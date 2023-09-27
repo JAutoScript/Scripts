@@ -1,0 +1,4568 @@
+package scripts;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
+
+import org.tribot.api.DynamicClicking;
+import org.tribot.api.General;
+import org.tribot.api.Timing;
+import org.tribot.api.input.Keyboard;
+import org.tribot.api.input.Mouse;
+import org.tribot.api.types.generic.Condition;
+import org.tribot.api.util.Screenshots;
+import org.tribot.api.util.abc.ABCUtil;
+import org.tribot.api2007.Banking;
+import org.tribot.api2007.Camera;
+import org.tribot.api2007.ChooseOption;
+import org.tribot.api2007.Combat;
+import org.tribot.api2007.Equipment;
+import org.tribot.api2007.Equipment.SLOTS;
+import org.tribot.api2007.Game;
+import org.tribot.api2007.GameTab;
+import org.tribot.api2007.GrandExchange;
+import org.tribot.api2007.Interfaces;
+import org.tribot.api2007.Inventory;
+import org.tribot.api2007.Login;
+import org.tribot.api2007.NPCChat;
+import org.tribot.api2007.NPCs;
+import org.tribot.api2007.Objects;
+import org.tribot.api2007.Options;
+import org.tribot.api2007.Player;
+import org.tribot.api2007.Screen;
+import org.tribot.api2007.Skills;
+import org.tribot.api2007.Varcs;
+import org.tribot.api2007.Walking;
+import org.tribot.api2007.WorldHopper;
+import org.tribot.api2007.GameTab.TABS;
+import org.tribot.api2007.Inventory.DROPPING_METHOD;
+import org.tribot.api2007.Login.STATE;
+import org.tribot.api2007.ext.Filters;
+import org.tribot.api2007.types.RSArea;
+import org.tribot.api2007.types.RSInterface;
+import org.tribot.api2007.types.RSItem;
+import org.tribot.api2007.types.RSNPC;
+import org.tribot.api2007.types.RSObject;
+import org.tribot.api2007.types.RSServer;
+import org.tribot.api2007.types.RSTile;
+import org.tribot.api2007.types.RSVarBit;
+import org.tribot.script.Script;
+import org.tribot.script.ScriptManifest;
+import org.tribot.script.interfaces.Arguments;
+import org.tribot.script.interfaces.EventBlockingOverride;
+import org.tribot.script.interfaces.MessageListening07;
+import org.tribot.script.interfaces.Painting;
+import org.tribot.util.Util;
+
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JCheckBox;
+import java.awt.Color;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.awt.event.ActionEvent;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+
+import java.awt.SystemColor;
+import java.awt.Transparency;
+
+import javax.swing.JSpinner;
+
+@ScriptManifest(category = "PTrainers", name = "Main", version = 1.00, description = "'generatelvls'", authors = { "" })
+public class SkillTrainPublic extends Script implements MessageListening07, Arguments {
+	
+	private static String arguments = "";
+	
+private static boolean generatinglevels;
+	
+	private static boolean onStart() {
+		Walking.setWalkingTimeout(General.randomLong(5700,6700));
+		if(arguments.length() > 0) {
+			if(arguments.contains("generatelvls")) {
+				generatinglevels = true;
+			}
+		}
+		
+		if(generatinglevels) {
+			saveSettings();
+			running = false;
+		}else {
+			loadSettings();
+		}
+		return true;
+	
+	}
+	
+	private static void addLongWaitTime() {
+		General.sleep(670,792);
+	}
+	
+	private static boolean single;
+	
+
+	private static int goalCrafting;
+	private static int goalFiremaking;
+	private static int goalFletching;
+	private static int goalHerblore;
+	private static int goalWoodcutting;
+	private static int goalMagic;
+	private static int goalConstruction;
+	
+	private static String highLevelSkill;
+	
+	private static int goalAttack;
+	private static int goalStrength;
+	private static int goalDefence;
+	
+	private static int goalRanged;
+	private static int goalCooking;
+	private static int goalSmithing;
+	
+	private static int goalFishing;
+	private static int goalThieving;
+	private static int goalMining;
+	
+	private static String trainingHelmet;
+	private static String trainingCape;
+	private static String trainingNecklace;
+	private static String trainingPlatebody;
+	private static String trainingPlatelegs;
+	private static String trainingBoots;
+	private static String trainingGloves;
+	private static String trainingRing;
+	private static String trainingSword;
+	private static String trainingShield;
+	
+	private static String chosenSkillOne;
+	
+	private static String chosenSkillTwo;
+	
+	public static String selectedSkill = "";
+	
+	private static boolean running;
+	
+	public static int getSkillsXP() {
+		return Skills.SKILLS.CRAFTING.getXP() + 
+				Skills.SKILLS.FIREMAKING.getXP() + 
+				Skills.SKILLS.FLETCHING.getXP() + 
+				Skills.SKILLS.HERBLORE.getXP() + 
+				Skills.SKILLS.WOODCUTTING.getXP() + 
+				Skills.SKILLS.MAGIC.getXP() + 
+				Skills.SKILLS.ATTACK.getXP() + 
+				Skills.SKILLS.DEFENCE.getXP() + 
+				Skills.SKILLS.STRENGTH.getXP() + 
+				Skills.SKILLS.RANGED.getXP() + 
+				Skills.SKILLS.COOKING.getXP() + 
+				Skills.SKILLS.SMITHING.getXP() + 
+				Skills.SKILLS.FISHING.getXP() + 
+				Skills.SKILLS.THIEVING.getXP() + 
+				Skills.SKILLS.MINING.getXP();
+	}
+	
+	private static void updateCombatFile() {
+
+		
+		
+	    try {
+	    	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").delete();
+	    	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").createNewFile(); 
+	    	General.println("Attempting to update the combat loadout");
+	        prop.clear();  
+	        prop.put("ChosenSkillOne: ", chosenSkillOne);
+	        prop.put("ChosenSkillTwo: ", chosenSkillTwo);
+	        
+	        prop.put("Crafting: ", Integer.toString(goalCrafting));
+	        prop.put("Firemaking: ", Integer.toString(goalFiremaking));
+	        prop.put("Fletching: ", Integer.toString(goalFletching));
+	        prop.put("Herblore: ", Integer.toString(goalHerblore));
+	        prop.put("Woodcutting: ", Integer.toString(goalWoodcutting));
+	        prop.put("Magic: ", Integer.toString(goalMagic));
+	        prop.put("Attack: ", Integer.toString(goalAttack));
+	        prop.put("Defence: ", Integer.toString(goalDefence));
+	        prop.put("Strength: ", Integer.toString(goalStrength));
+	        prop.put("Ranged: ", Integer.toString(goalRanged));
+	        prop.put("Cooking: ", Integer.toString(goalCooking));
+	        prop.put("Smithing: ", Integer.toString(goalSmithing));
+	        prop.put("Fishing: ", Integer.toString(goalFishing));
+	        prop.put("Thieving: ", Integer.toString(goalThieving));
+	        prop.put("Mining: ", Integer.toString(goalMining));
+	        
+	        generateCombatLoadout();
+	        prop.put("Helmet: ", trainingHelmet);
+	        prop.put("Cape: ", trainingCape);
+	        prop.put("Necklace: ", trainingNecklace);
+	        prop.put("Platebody: ", trainingPlatebody);
+	        prop.put("Platelegs: ", trainingPlatelegs);
+	        prop.put("Boots: ", trainingBoots);
+	        prop.put("Gloves: ", trainingGloves);
+	        prop.put("Ring: ", trainingRing);
+	        prop.put("Sword: ", trainingSword);
+	        prop.put("Shield: ", trainingShield);
+	        
+	        
+	        prop.store(new FileOutputStream(new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini")), Player.getRSPlayer().getName());
+	        General.println("Generated file success");
+	    } catch (Exception e1) {
+	     	General.println("Failed to save new items.");
+	        e1.printStackTrace();
+	    }
+	
+	}
+	
+	private static void saveSettings() {
+		
+		
+	    try {
+	    	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").delete();
+	    	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").createNewFile(); 
+	    	General.println("Attempting save current items for new acc");
+	    	generateLevels();
+	    	
+	    	//generateCombatLoadout();
+	        prop.clear();  
+	        prop.put("ChosenSkillOne: ", chosenSkillOne);
+	        prop.put("ChosenSkillTwo: ", chosenSkillTwo);
+	        
+	        prop.put("Crafting: ", Integer.toString(goalCrafting));
+	        prop.put("Firemaking: ", Integer.toString(goalFiremaking));
+	        prop.put("Fletching: ", Integer.toString(goalFletching));
+	        prop.put("Herblore: ", Integer.toString(goalHerblore));
+	        prop.put("Woodcutting: ", Integer.toString(goalWoodcutting));
+	        prop.put("Magic: ", Integer.toString(goalMagic));
+	        prop.put("Attack: ", Integer.toString(goalAttack));
+	        prop.put("Defence: ", Integer.toString(goalDefence));
+	        prop.put("Strength: ", Integer.toString(goalStrength));
+	        prop.put("Ranged: ", Integer.toString(goalRanged));
+	        prop.put("Cooking: ", Integer.toString(goalCooking));
+	        prop.put("Smithing: ", Integer.toString(goalSmithing));
+	        prop.put("Fishing: ", Integer.toString(goalFishing));
+	        prop.put("Thieving: ", Integer.toString(goalThieving));
+	        prop.put("Mining: ", Integer.toString(goalMining));
+	        
+	        prop.store(new FileOutputStream(new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini")), Player.getRSPlayer().getName());
+	        General.println("Generated file success");
+	    } catch (Exception e1) {
+	     	General.println("Failed to save new items.");
+	        e1.printStackTrace();
+	    }
+	}
+	
+	private static void generateLevels() {
+		addAvailSkills();
+		Collections.shuffle(availSkills);
+		if(availSkills != null) {
+			int i = General.random(0, availSkills.size());
+			chosenSkillOne = availSkills.get(i);
+			availSkills.remove(i);
+			
+			int b = General.random(0, availSkills.size());
+			chosenSkillTwo = availSkills.get(b);
+			availSkills.remove(b);
+		}
+
+		goalCrafting = General.random(65,75);
+		goalFiremaking = General.random(65,75);
+		goalFletching = General.random(65,75);
+		goalHerblore = General.random(65,75);
+		goalWoodcutting = General.random(65,75);
+		goalMagic = General.random(65,75);
+		
+		goalAttack = General.random(65,75);
+		goalDefence = General.random(65,75);
+		goalStrength = General.random(65,75);
+		
+		goalRanged = General.random(65,75);
+		goalCooking = General.random(65,75);
+		goalSmithing = General.random(65,75);
+		goalFishing = General.random(65,75);
+		goalThieving = General.random(65,75);
+		goalMining = General.random(65,75);
+	}
+	
+	private static ArrayList<String> tempItemArray = new ArrayList<String>();
+	
+	private static String[] helmetOptionsArrayUnderSixty = new String[] {"Rune full helm","Rune full helm (t)","Saradomin full helm",
+			"Guthix full helm","Armadyl full helm","Bandos full helm","Ancient full helm"};
+	
+	private static String[] helmetOptionsArrayUnderS = new String[] {"Rune full helm","Rune full helm (t)","Saradomin full helm",
+			"Guthix full helm","Armadyl full helm","Bandos full helm","Ancient full helm"};
+	
+	
+	private static boolean needsToUpdateCombatFile() {
+		boolean shouldUpdateFile = false;
+		int tracker = 0;
+		//check helmet
+		if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+			tempItemArray.clear();
+			tempItemArray.add("Rune full helm");
+			tempItemArray.add("Rune full helm (t)");
+			tempItemArray.add("Saradomin full helm");
+			tempItemArray.add("Guthix full helm");
+			tempItemArray.add("Armadyl full helm");
+			tempItemArray.add("Bandos full helm");
+        	tempItemArray.add("Ancient full helm");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingHelmet)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+		}
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 70 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+			tempItemArray.clear();
+			tempItemArray.add("Dragon med helm");
+			tempItemArray.add("Granite helm");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingHelmet)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        }
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 70) {
+
+			tempItemArray.clear();
+			tempItemArray.add("Verac's helm");
+			tempItemArray.add("Torag's helm");
+			tempItemArray.add("Dragon med helm");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingHelmet)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        }
+        
+        
+        //check platebody
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 50 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+			tempItemArray.clear();
+			tempItemArray.add("Rune chainbody");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingPlatebody)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        }
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() >= 50) {
+
+			tempItemArray.clear();
+			tempItemArray.add("Granite body");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingPlatebody)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        
+        }
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 70 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+
+			tempItemArray.clear();
+			tempItemArray.add("Dragon chainbody");
+			tempItemArray.add("Granite body");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingPlatebody)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        
+        }
+        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 70) {
+
+
+			tempItemArray.clear();
+			tempItemArray.add("Torag's platebody");
+			tempItemArray.add("Verac's brassard");
+			tempItemArray.add("Dragon chainbody");
+        	
+        	for(int i = 0; i < tempItemArray.size(); i++) {
+        		if(tempItemArray.get(i).contains(trainingPlatebody)) {
+        			tracker++;
+        		}
+        	}
+        	
+        	if(tracker != 1) {
+        		shouldUpdateFile = true;
+        	}
+        	tempItemArray.clear();
+        }
+        
+        //check platelegs
+		if(shouldUpdateFile) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static void generateCombatLoadout() {
+	        //Helmet
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Rune full helm");
+	        	equipmentOptions.add("Rune full helm (t)");
+	        	equipmentOptions.add("Saradomin full helm");
+	        	equipmentOptions.add("Guthix full helm");
+	        	equipmentOptions.add("Armadyl full helm");
+	        	equipmentOptions.add("Bandos full helm");
+	        	equipmentOptions.add("Ancient full helm");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingHelmet = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 70 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Dragon med helm");
+	        	equipmentOptions.add("Granite helm");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingHelmet = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 70) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Verac's helm");
+	        	equipmentOptions.add("Torag's helm");
+	        	equipmentOptions.add("Dragon med helm");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingHelmet = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        
+	        //Cape
+	        trainingCape = "Obsidian cape";
+	        
+	        //Necklace
+	        trainingNecklace = "Amulet of glory(6)";
+	        
+	        //Platebody
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 50 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+	        	trainingCape = "Rune chainbody";
+	        }
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() >= 50) {
+	        	trainingCape = "Granite body";
+	        }
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 70 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+	        	trainingCape = "Dragon chainbody";
+	        }
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 70) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Torag's platebody");
+	        	equipmentOptions.add("Verac's brassard");
+	        	equipmentOptions.add("Dragon chainbody");
+	        	//is this rly what u want only one item/
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingPlatebody = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        //Platelegs
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Rune platelegs");
+	        	equipmentOptions.add("Rune platelegs (t)");
+	        	equipmentOptions.add("Guthix platelegs");
+	        	equipmentOptions.add("Saradomin platelegs");
+	        	equipmentOptions.add("Zamorak platelegs");
+	        	equipmentOptions.add("Armadyl platelegs");
+	        	equipmentOptions.add("Ancient platelegs");
+	        	equipmentOptions.add("Bandos platelegs");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingPlatelegs = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 70 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Dragon platelegs");
+	        	equipmentOptions.add("Dragon plateskirt");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingPlatelegs = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 70) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Dragon platelegs");
+	        	equipmentOptions.add("Dragon plateskirt");
+	        	equipmentOptions.add("Torag's platelegs");
+	        	equipmentOptions.add("Verac's plateskirt");
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingPlatelegs = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+
+	        //Boots
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+	        	trainingBoots = "Rune boots";
+	        }
+	        
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+
+	        	trainingBoots = "Dragon boots";
+	        
+	        }
+	        
+	        
+	        
+	        //Gloves
+	        trainingGloves = "Combat bracelet(6)";
+	        
+	        //ring
+	        trainingGloves = "Warrior ring";
+	        
+	        //sword
+	        if(Skills.SKILLS.ATTACK.getActualLevel() < 50 && Skills.SKILLS.ATTACK.getActualLevel() > 0) {
+	        	trainingSword = "Rune scimitar";
+	        }
+	        
+	        if(Skills.SKILLS.ATTACK.getActualLevel() < 60 && Skills.SKILLS.ATTACK.getActualLevel() >= 50) {
+
+	        	trainingSword = "Granite hammer";
+	        
+	        }
+	        
+	        if(Skills.SKILLS.ATTACK.getActualLevel() < 70 && Skills.SKILLS.ATTACK.getActualLevel() >= 60) {
+
+	        	trainingSword = "Dragon sword";
+	        
+	        }
+	        
+	        if(Skills.SKILLS.ATTACK.getActualLevel() < 100 && Skills.SKILLS.ATTACK.getActualLevel() >= 70) {
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Saradomin sword");
+	        	equipmentOptions.add("Torag's hammers");
+	        	equipmentOptions.add("Verac's flail");
+	        	//is this rly what u want only one item/
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingSword = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        }
+	        
+	        //shield
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 60 && Skills.SKILLS.DEFENCE.getActualLevel() > 0) {
+
+	        	equipmentOptions.clear();
+	        	equipmentOptions.add("Rune kiteshield");
+	        	equipmentOptions.add("Rune kiteshield (g)");
+	        	equipmentOptions.add("Rune kiteshield (t)");
+	        	equipmentOptions.add("Bandos kiteshield");
+	        	equipmentOptions.add("Ancient kiteshield");
+	        	equipmentOptions.add("Armadyl kiteshield");
+	        	equipmentOptions.add("Zamorak kiteshield");
+	        	equipmentOptions.add("Saradomin kiteshield");
+	        	equipmentOptions.add("Guthix kiteshield");
+	        	//is this rly what u want only one item/
+	        	Collections.shuffle(equipmentOptions);
+	        	trainingShield = equipmentOptions.get(General.random(0, equipmentOptions.size()));
+	        	equipmentOptions.clear();
+	        
+	        }
+	        
+	        if(Skills.SKILLS.DEFENCE.getActualLevel() < 100 && Skills.SKILLS.DEFENCE.getActualLevel() >= 60) {
+	        	
+	        	trainingShield = "Toktz-ket-xil";
+	        
+	        }
+	     
+	}
+	
+	private static ArrayList<String> equipmentOptions = new ArrayList<String>();
+	
+	
+	private static Properties prop = new Properties();
+	
+	private static ArrayList<String> availSkills = new ArrayList<String>();
+	
+	private static void addAvailSkills() {
+		availSkills.clear();
+		availSkills.add("Crafting");
+		availSkills.add("Firemaking");
+		availSkills.add("Fletching");
+		availSkills.add("Herblore");
+		availSkills.add("Woodcutting");
+		availSkills.add("Magic");
+		availSkills.add("Combat");
+		availSkills.add("Ranged");
+		availSkills.add("Cooking");
+		availSkills.add("Smithing");
+		availSkills.add("Fishing");
+		availSkills.add("Thieving");
+		availSkills.add("Mining");
+	}
+	
+	private static void loadSettings() {
+		loadSettingAttempt();
+		if(!loadedSettings) {
+			General.sleep(500,1000);
+			loadSettingAttempt();
+		}
+	}
+	
+	private static boolean loadedSettings;
+	
+	
+	
+	 private static void loadSettingAttempt() {
+	        try {
+	            if (new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").exists() && pathHasSettings()) {       
+	                prop.load(new FileInputStream(new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini")));
+	                
+	               
+	                String eefe = prop.getProperty("ChosenSkillOne: ");
+	                if(eefe  != null) {
+	                	chosenSkillOne = eefe.toString();
+	                }
+	                
+	                String eefee = prop.getProperty("ChosenSkillTwo: ");
+	                if(eefee  != null) {
+	                	chosenSkillTwo = eefe.toString();
+	                }
+	                
+	                String helm = prop.getProperty("Crafting: ");
+	                if(helm != null) {
+	                	  goalCrafting = Integer.parseInt(helm);
+	                }
+
+	                
+	                String body = prop.getProperty("Firemaking: ");
+	                if(body  != null) {
+	                	 goalFiremaking = Integer.parseInt(body);
+	                }
+	                
+	                String legs = prop.getProperty("Fletching: ");
+	                if(legs  != null) {
+	                	 goalFletching = Integer.parseInt(legs);
+	                }
+	              
+	                String boots = prop.getProperty("Herblore: ");
+	                if(boots  != null) {
+	                	 goalHerblore = Integer.parseInt(boots);
+	                }
+	                
+	                String cape = prop.getProperty("Woodcutting: ");
+	                if(cape  != null) {
+	                	goalWoodcutting = Integer.parseInt(cape);
+	                }
+	                
+	                String la = prop.getProperty("Magic: ");
+	                if(la  != null) {
+	                	goalMagic = Integer.parseInt(la);
+	                }
+	                
+	                String laa = prop.getProperty("Attack: ");
+	                if(laa  != null) {
+	                	goalAttack = Integer.parseInt(laa);
+	                }
+	                String laaa = prop.getProperty("Strength: ");
+	                if(laaa  != null) {
+	                	goalStrength = Integer.parseInt(laaa);
+	                }
+	                String we = prop.getProperty("Defence: ");
+	                if(we  != null) {
+	                	goalDefence = Integer.parseInt(we);
+	                }
+	                String weet = prop.getProperty("Ranged: ");
+	                if(weet  != null) {
+	                	goalRanged = Integer.parseInt(weet);
+	                }
+	                
+	                String weete = prop.getProperty("Cooking: ");
+	                if(weete  != null) {
+	                	goalCooking = Integer.parseInt(weete);
+	                }
+	                
+	                String feele = prop.getProperty("Smithing: ");
+	                if(feele  != null) {
+	                	goalSmithing = Integer.parseInt(feele);
+	                }
+	                
+	                String amff = prop.getProperty("Fishing: ");
+	                if(amff  != null) {
+	                	goalFishing = Integer.parseInt(amff);
+	                }
+	                
+	                String ewrwe = prop.getProperty("Thieving: ");
+	                if(ewrwe  != null) {
+	                	goalThieving = Integer.parseInt(ewrwe);
+	                }
+	                
+	                String alwlw = prop.getProperty("Mining: ");
+	                if(alwlw  != null) {
+	                	goalMining = Integer.parseInt(alwlw);
+	                }
+	                
+	                //EQUIPMENT SECTION
+	                
+	                String fefe = prop.getProperty("Helmet: ");
+	                if(fefe  != null) {
+	                	trainingHelmet =  fefe.toString();
+	                }
+	                
+	                String fefef = prop.getProperty("Cape: ");
+	                if(fefef  != null) {
+	                	trainingCape =  fefef.toString();
+	                }
+	                
+	                String fefefe = prop.getProperty("Necklace: ");
+	                if(fefefe  != null) {
+	                	trainingNecklace =  fefefe.toString();
+	                }
+	                
+	                String fefefef = prop.getProperty("Platebody: ");
+	                if(fefefef  != null) {
+	                	trainingPlatebody =  fefefef.toString();
+	                }
+	                
+	                String fefefefe = prop.getProperty("Platelegs: ");
+	                if(fefefefe  != null) {
+	                	trainingPlatelegs =  fefefefe.toString();
+	                }
+	                
+	                String fefefefef = prop.getProperty("Boots: ");
+	                if(fefefefef  != null) {
+	                	trainingBoots =  fefefefef.toString();
+	                }
+	                
+	                String fefefefefe = prop.getProperty("Gloves: ");
+	                if(fefefefefe  != null) {
+	                	trainingGloves =  fefefefefe.toString();
+	                }
+	                
+	                String fefefefefef = prop.getProperty("Ring: ");
+	                if(fefefefefef  != null) {
+	                	trainingRing =  fefefefefef.toString();
+	                }
+	                
+	                String fefefefefefe = prop.getProperty("Shield: ");
+	                if(fefefefefefe  != null) {
+	                	trainingShield =  fefefefefefe.toString();
+	                }
+	                
+	                String fefefefefefef = prop.getProperty("Sword: ");
+	                if(fefefefefefef  != null) {
+	                	trainingSword =  fefefefefefef.toString();
+	                }
+	                
+	                
+	                loadedSettings = true;
+	                //read the file.
+	            }else {
+	            	 System.out.print("Unable to load settings");
+	            	 running = false;
+	            	/*
+	            	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").delete();
+	            	new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").createNewFile(); 
+	            	saveSettings();
+	            	*/
+	            }
+	           
+	        } catch (Exception e2) {
+	        	running = false;
+	            System.out.print("Unable to load settings");
+	            e2.printStackTrace();
+	        }
+	    
+	 }
+	 
+	 private static boolean pathHasSettings() {
+
+		 try {
+	            if (new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini").exists()) {
+	            
+	       			 prop.load(new FileInputStream(new File(Util.getWorkingDirectory().getAbsolutePath(), Player.getRSPlayer().getName() + ".ini")));
+	       			 
+	       			 if(prop.getProperty("Crafting: ") != null && prop.getProperty("Crafting: ").length() > 0) {
+	       				 if(prop.getProperty("Firemaking: ") != null && prop.getProperty("Firemaking: ").length() > 0) {
+	       					 if(prop.getProperty("Fletching: ") != null && prop.getProperty("Fletching: ").length() > 0) {
+	       						 if(prop.getProperty("Herblore: ") != null && prop.getProperty("Herblore: ").length() > 0) {
+	       							 if(prop.getProperty("Woodcutting: ") != null && prop.getProperty("Woodcutting: ").length() > 0) {
+	       								 if(prop.getProperty("Magic: ") != null && prop.getProperty("Magic: ").length() > 0) {
+	       									 if(prop.getProperty("Attack: ") != null && prop.getProperty("Attack: ").length() > 0) {
+	       										 if(prop.getProperty("Strength: ") != null && prop.getProperty("Strength: ").length() > 0) {
+	       											 if(prop.getProperty("Defence: ") != null && prop.getProperty("Defence: ").length() > 0) {
+	       												 if(prop.getProperty("Ranged: ") != null && prop.getProperty("Ranged: ").length() > 0) {
+	       													 if(prop.getProperty("Cooking: ") != null && prop.getProperty("Cooking: ").length() > 0) {
+	       														if(prop.getProperty("Fishing: ") != null && prop.getProperty("Fishing: ").length() > 0) {
+	       															
+	       																if(prop.getProperty("Smithing: ") != null && prop.getProperty("Smithing: ").length() > 0) {
+	       																	if(prop.getProperty("Thieving: ") != null && prop.getProperty("Thieving: ").length() > 0) {
+	       																		if(prop.getProperty("Mining: ") != null && prop.getProperty("Mining: ").length() > 0) {
+		    	   	               			       								 	return true;
+		    	   	               			       							 	}
+	    	   	               			       							 	}
+		   	               			       							 	}
+	   	               			       							 	
+		               			       							 }
+	               			       							 }
+	           			       							 }
+	       			       							 }
+	       		       							 }
+	       	       							 }
+	           							 }
+	       							 }
+	       						 }
+	       					 }
+	       				 }
+	       			 }
+	       		
+	            }
+	           
+	        } catch (Exception e2) {
+	            System.out.print("Unable to load settings");
+	            e2.printStackTrace();
+	        }
+		 
+		
+		return false;
+
+	 }
+	
+	
+
+	@Override
+	public void passArguments(HashMap<String, String> arg0) {
+
+		// private static String arguments = "";
+
+		arguments = arg0.toString();
+		arguments = arguments.replace("{custom_input=", "");
+		arguments = arguments.replace("}", "");
+		
+	
+		
+	}
+	
+	private static String holdSpacebarText;
+	
+	private static boolean spacebarAvailableForPress() {
+		if(selectedSkill.contains("Crafting")) {
+			if(currentSkillTask.contains("BeerGlass")) {
+				if(Interfaces.get(270,13,0) != null && Interfaces.get(270,13,0).getText() != null) {
+					holdSpacebarText = Interfaces.get(270,13,0).getText();
+					if(holdSpacebarText.contains("Space")) {
+						holdSpacebarText = "";
+						return true;
+					}
+				}
+				
+			
+			}
+			if(currentSkillTask.contains("Vial")) {
+				if(Interfaces.get(270,13,3) != null && Interfaces.get(270,13,3).getText() != null) {
+					holdSpacebarText = Interfaces.get(270,13,3).getText();
+					if(holdSpacebarText.contains("Space")) {
+						holdSpacebarText = "";
+						return true;
+					}
+				}
+				
+			}
+			if(currentSkillTask.contains("Orb")) {
+				if(Interfaces.get(270,13,5) != null && Interfaces.get(270,13,5).getText() != null) {
+					holdSpacebarText = Interfaces.get(270,13,5).getText();
+					if(holdSpacebarText.contains("Space")) {
+						holdSpacebarText = "";
+						return true;
+					}
+				}
+				
+			}
+		}
+		
+		if(selectedSkill.contains("Fletching")) {
+			if(currentSkillTask.contains("FinalBows")) {
+				
+				return true;
+			}
+			if(currentSkillTask.contains("BeginningBows")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 5) {
+					if(Interfaces.get(270,13,0) != null && Interfaces.get(270,13,0).getText() != null) {
+						holdSpacebarText = Interfaces.get(270,13,0).getText();
+						if(holdSpacebarText.contains("Space")) {
+							holdSpacebarText = "";
+							return true;
+						}
+					}
+				}else {
+					if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 10) {
+						if(Interfaces.get(270,13,2) != null && Interfaces.get(270,13,2).getText() != null) {
+							holdSpacebarText = Interfaces.get(270,13,2).getText();
+							if(holdSpacebarText.contains("Space")) {
+								holdSpacebarText = "";
+								return true;
+							}
+						}
+					}else {
+						if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 20) {
+							if(Interfaces.get(270,13,3) != null && Interfaces.get(270,13,3).getText() != null) {
+								holdSpacebarText = Interfaces.get(270,13,3).getText();
+								if(holdSpacebarText.contains("Space")) {
+									holdSpacebarText = "";
+									return true;
+								}
+							}
+						}else {
+							if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 25) {
+								if(Interfaces.get(270,13,1) != null && Interfaces.get(270,13,1).getText() != null) {
+									holdSpacebarText = Interfaces.get(270,13,1).getText();
+									if(holdSpacebarText.contains("Space")) {
+										holdSpacebarText = "";
+										return true;
+									}
+								}
+							}else {
+								if(Interfaces.get(270,13,2) != null && Interfaces.get(270,13,2).getText() != null) {
+									holdSpacebarText = Interfaces.get(270,13,2).getText();
+									if(holdSpacebarText.contains("Space")) {
+										holdSpacebarText = "";
+										return true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsWillow")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 40) {
+					if(Interfaces.get(270,13,1) != null && Interfaces.get(270,13,1).getText() != null) {
+						holdSpacebarText = Interfaces.get(270,13,1).getText();
+						if(holdSpacebarText.contains("Space")) {
+							holdSpacebarText = "";
+							return true;
+						}
+					}
+				}else {
+					if(Interfaces.get(270,13,2) != null && Interfaces.get(270,13,2).getText() != null) {
+						holdSpacebarText = Interfaces.get(270,13,2).getText();
+						if(holdSpacebarText.contains("Space")) {
+							holdSpacebarText = "";
+							return true;
+						}
+					}
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsMaple")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 55) {
+					if(Interfaces.get(270,13,1) != null && Interfaces.get(270,13,1).getText() != null) {
+						holdSpacebarText = Interfaces.get(270,13,1).getText();
+						if(holdSpacebarText.contains("Space")) {
+							holdSpacebarText = "";
+							return true;
+						}
+					}
+				}else {
+					if(Interfaces.get(270,13,2) != null && Interfaces.get(270,13,2).getText() != null) {
+						holdSpacebarText = Interfaces.get(270,13,2).getText();
+						if(holdSpacebarText.contains("Space")) {
+							holdSpacebarText = "";
+							return true;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		if(selectedSkill.contains("Herblore")) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static void pressProperKeypad() {
+		if(selectedSkill.contains("Crafting")) {
+			if(currentSkillTask.contains("BeerGlass")) {
+				RSInterface clicker = Interfaces.get(270,14);
+				if(clicker != null) {
+					clicker.click();
+					General.sleep(102,196);
+				}
+				//Keyboard.pressKeys(KeyEvent.VK_1);
+			}
+			if(currentSkillTask.contains("Vial")) {
+				RSInterface clicker = Interfaces.get(270,17);
+				if(clicker != null) {
+					clicker.click();
+					General.sleep(102,196);
+				}
+				//Keyboard.pressKeys(KeyEvent.VK_4);
+			}
+			if(currentSkillTask.contains("Orb")) {
+				RSInterface clicker = Interfaces.get(270,19);
+				if(clicker != null) {
+					clicker.click();
+					General.sleep(102,196);
+				}
+				//Keyboard.pressKeys(KeyEvent.VK_6);
+				
+			}
+		}
+		
+		if(selectedSkill.contains("Fletching")) {
+			
+			if(currentSkillTask.contains("BeginningBows")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 5) {
+					RSInterface clicker = Interfaces.get(270,14);
+					if(clicker != null) {
+						clicker.click();
+						General.sleep(102,196);
+					}
+				}else {
+					if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 10) {
+						RSInterface clicker = Interfaces.get(270,16);
+						if(clicker != null) {
+							clicker.click();
+							General.sleep(102,196);
+						}
+					}else {
+						if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 20) {
+							RSInterface clicker = Interfaces.get(270,17);
+							if(clicker != null) {
+								clicker.click();
+								General.sleep(102,196);
+							}
+						}else {
+							if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 25) {
+								RSInterface clicker = Interfaces.get(270,15);
+								if(clicker != null) {
+									clicker.click();
+									General.sleep(102,196);
+								}
+							}else {
+								RSInterface clicker = Interfaces.get(270,16);
+								if(clicker != null) {
+									clicker.click();
+									General.sleep(102,196);
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			if(currentSkillTask.contains("MiddleBowsWillow")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 40) {
+					RSInterface clicker = Interfaces.get(270,15);
+					if(clicker != null) {
+						clicker.click();
+						General.sleep(102,196);
+					}
+				}else {
+					RSInterface clicker = Interfaces.get(270,16);
+					if(clicker != null) {
+						clicker.click();
+						General.sleep(102,196);
+					}
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsMaple")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 55) {
+					RSInterface clicker = Interfaces.get(270,15);
+					if(clicker != null) {
+						clicker.click();
+						General.sleep(102,196);
+					}
+				}else {
+					RSInterface clicker = Interfaces.get(270,16);
+					if(clicker != null) {
+						clicker.click();
+						General.sleep(102,196);
+					}
+				}
+			}
+			
+			
+		}
+		
+	}
+	
+	
+	public static void openBankForBankstanding(Rectangle heet, String theskill) {
+		PTrain.outsideBankCheckers();
+		
+		RSObject[] a = Objects.getAt(bankingTile);
+		if(a.length > 0) {
+			if(a[0].isClickable()) {
+				if(GameTab.getOpen() != TABS.INVENTORY) {
+					
+					GameTab.open(TABS.INVENTORY);
+					PTrain.antibanSleep(96,141);
+				}
+
+				if(General.random(1,279) == 1) {
+					PTrain.antibanSleep(5400,15230);
+				}
+				Mouse.setSpeed(General.random(60,95));
+				if(General.random(1,40) == 1) {
+					Point[] pointsOfBox = a[0].getModel().getAllVisiblePoints();
+					double minX = 1000;
+					double minY = 1000;
+					
+					double maxX = 1;
+					double maxY = 1;
+					
+					for(int i = 0; i < pointsOfBox.length; i++) {
+						if(pointsOfBox[i].getX() < minX) {
+							minX = pointsOfBox[i].getX();;
+						}
+					}
+					for(int i = 0; i < pointsOfBox.length; i++) {
+						if(pointsOfBox[i].getY() < minY) {
+							minY = pointsOfBox[i].getY();
+						}
+					}
+					for(int i = 0; i < pointsOfBox.length; i++) {
+						if(pointsOfBox[i].getX() > maxX) {
+							maxX = pointsOfBox[i].getX();
+						}
+					}
+					for(int i = 0; i < pointsOfBox.length; i++) {
+						if(pointsOfBox[i].getY() > maxY) {
+							maxY = pointsOfBox[i].getY();
+						}
+					}
+					
+					int the = General.random(1, 4);
+					if(the == 1) {
+						Mouse.clickBox((int)minX - General.random(6, 12), 
+								(int)minY - General.random(6, 12),
+								(int)minX,
+								(int)maxY + General.random(6, 12), 
+								1);
+					}
+					if(the == 2) {
+						Mouse.clickBox((int)minX - General.random(6, 12), 
+								(int)maxY,
+								(int)maxX + General.random(6, 12),
+								(int)maxY + General.random(6, 12), 
+								1);
+					}
+					if(the == 3) {
+						Mouse.clickBox((int)maxX, 
+								(int)minY  - General.random(6, 12),
+								(int)maxX + General.random(6, 12),
+								(int)maxY + General.random(6, 12), 
+								1);
+					}
+					if(the == 4) {
+						Mouse.clickBox((int)minX - General.random(6, 12), 
+								(int)minY  - General.random(6, 12),
+								(int)maxX + General.random(6, 12),
+								(int)minY, 
+								1);
+					}
+		
+					
+					PTrain.antibanSleep(89,179);
+					if(DynamicClicking.clickRSObject(a[0], 1)) {
+						PTrain.antibanSleep(89,179);
+						hoverToBankSpot(theskill);
+						//prepHoverEss();
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(19,38);
+								return Banking.isBankScreenOpen();
+							}
+						}, General.random(5889,7119));
+						PTrain.antibanSleep(89,169);
+				}
+				}else {
+					
+					a[0].click("Bank");
+					PTrain.antibanSleep(89,179);
+					hoverToBankSpot(theskill);
+						
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(19,38);
+								return Banking.isBankScreenOpen();
+							}
+						}, General.random(5889,7119));
+						PTrain.antibanSleep(89,169);
+				}
+					Mouse.setSpeed(General.random(35,70));
+			
+			}else {
+
+				walkRandomBlindwalk(bankingTile, 1);
+				PTrain.antibanSleep(369,512);
+				while(Player.isMoving()) {
+					General.sleep(69,139);
+				}
+			
+			}
+		}else {
+
+			walkRandomBlindwalk(bankingTile, 1);
+			PTrain.antibanSleep(369,512);
+			while(Player.isMoving()) {
+				PTrain.antibanSleep(69,139);
+			}
+		
+		}
+	
+	
+	}
+	
+	private static Point currentMousePos;
+
+	
+	private static void closeBankForBankstanding() {
+		Keyboard.pressKeys(KeyEvent.VK_ESCAPE);
+		
+	}
+	
+	private static boolean levelUp() {
+		return Interfaces.get(226,1) != null || Interfaces.get(233,3) != null;
+	}
+	
+	private static Rectangle leftSide;
+	private static Rectangle rightSide;
+	private static Rectangle topSide;
+	private static Rectangle bottomSide;
+	
+	private static void misclickBox(int b, int c, int d, int e, int x, int y) {
+		Rectangle a = new Rectangle(b,c,d,e);
+		leftSide = new Rectangle(
+				(int)a.getMinX() - x,
+				(int)a.getMinY() - y,
+				(int)a.getMinX(),
+				(int)a.getMaxY() + y);
+		
+		rightSide = new Rectangle(
+				(int)a.getMaxX(),
+				(int)a.getMinY() - 7,
+				(int)a.getMaxX() + x,
+				(int)a.getMaxY() + 7);
+		
+		topSide = new Rectangle(
+				(int)a.getMinX() - x,
+				(int)a.getMinY() - y,
+				(int)a.getMaxX() + x,
+				(int)a.getMinY());
+		
+		bottomSide = new Rectangle(
+				(int)a.getMinX() - x,
+				(int)a.getMaxY(),
+				(int)a.getMaxX() + x,
+				(int)a.getMaxY() + y);
+		
+
+		if(General.random(1,2) == 1) {
+			if(General.random(1,2) == 1) {
+				Mouse.clickBox(leftSide, 1);
+			}else {
+				Mouse.clickBox(rightSide, 1);
+			}
+		}else {
+			if(General.random(1,3) == 1) {
+				if(General.random(1,3) == 1) {
+					Mouse.clickBox(leftSide, 1);
+				}else {
+					Mouse.clickBox(rightSide, 1);
+				}
+				
+			}else {
+				if(General.random(1,2) == 1) {
+					if(General.random(1,2) == 1) {
+						Mouse.clickBox(topSide, 1);
+					}else {
+						Mouse.clickBox(bottomSide, 1);
+					}
+				}else {
+					if(General.random(1,4) == 1) {
+						Mouse.clickBox(leftSide, 1);
+					}else {
+						Mouse.clickBox(rightSide, 1);
+					}
+				}
+				
+			}
+		}
+	}
+	
+	public static void itemCombinerManual(String oneItem, String twoItem) {
+
+		if(GameTab.open(TABS.INVENTORY)) {
+			PTrain.antibanSleep(89,176);
+		}
+		if(Game.getUptext().contains("->")) {
+			clickRandomInventoryItem();
+			PTrain.antibanSleep(369,512);
+		}
+		
+		if(Banking.isBankScreenOpen()) {
+			Banking.close();
+			General.sleep(89,176);
+		}
+		
+		RSItem[] a = Inventory.find(oneItem);
+		RSItem[] b = Inventory.find(twoItem);
+		if(a.length > 0) {
+			a[0].click();
+			PTrain.antibanSleep(89,176);
+			if(b.length > 0) {
+				b[0].click();
+				PTrain.antibanSleep(89,176);
+			}
+		}
+		
+		
+
+		if(General.random(1,177) != 1) {
+			Mouse.setSpeed(General.random(0, 1));
+			Mouse.moveBox((int)Mouse.getPos().getX() - 200, (int)Mouse.getPos().getY() - 200, 
+					(int)Mouse.getPos().getX() + 40, (int)Mouse.getPos().getY() + 150);
+			Mouse.setSpeed(General.random(110,115));
+			PTrain.antibanSleep(89,176);
+		}
+		
+		PTrain.antibanSleep(89,176);
+		
+		if(GameTab.getOpen() != TABS.INVENTORY) {
+			GameTab.open(TABS.INVENTORY);
+			General.sleep(96,189);
+			if(Player.getPosition().distanceTo(bankingTile) != 0) {
+				if(bankingTile.isClickable()) {
+					bankingTile.click("Walk here");
+					General.sleep(96,189);
+				}
+			}
+			return;
+		}
+		
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return Interfaces.get(270) != null || levelUp();
+					}
+				}, General.random(3728,4128));
+				if(levelUp()) {
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					Keyboard.pressKeys(KeyEvent.VK_SPACE);
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					return;
+					
+				}
+				if(Interfaces.get(270) != null) {
+					PTrain.antibanSleep(196,279);
+					if(spacebarAvailableForPress()) {
+						if(General.random(1,196) == 1) {
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+							PTrain.antibanSleep(143,179);
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+						}else {
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+						}
+						
+					}else {
+						pressProperKeypad();
+					}
+					PTrain.antibanSleep(89,176);
+					if(General.random(1,112) != 1) {
+						Mouse.setSpeed(General.random(0, 1));
+						Mouse.moveBox((int)Mouse.getPos().getX() - 75, (int)Mouse.getPos().getY() - 200, 
+								(int)Mouse.getPos().getX() + 75, (int)Mouse.getPos().getY() + 75);
+						Mouse.setSpeed(General.random(110,115));
+						PTrain.antibanSleep(89,176);
+					}   
+					
+					if(General.random(1,134) == 1) {
+						PTrain.antibanSleep(3240, 7123);
+						Mouse.leaveGame(true);
+						
+					}else {
+						PTrain.antibanSleep(89,176);
+						Mouse.leaveGame(true);
+					}
+					
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(31,51);
+							return Player.getAnimation() != -1;
+						}
+					}, General.random(3400,4100));
+					if(Player.getAnimation() == -1) {
+						return;
+					}
+					disableAntiban = true;
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,33);
+							return Inventory.getCount(twoItemHold) == 0 || 
+									levelUp();
+						}
+					}, General.random(44182,58172));
+					enableAntiban = true;
+					General.println("broken longwait");
+					if(levelUp() || Inventory.getCount(twoItemHold) == 0) {
+						PTrain.antibanSleep(4918,5418);
+						randomWaits();
+						
+					}
+					
+				}
+	
+	
+	}
+	
+
+	
+	public static boolean enableAntiban = false;
+	
+	
+	
+	
+	private static void hoverBank() {
+		RSObject[] a = Objects.getAt(bankingTile);
+		if(a.length > 0) {
+			if(a[0].isClickable()) {
+				a[0].hover();
+				PTrain.antibanSleep(169,241);
+			}
+			
+		}
+	}
+	
+	public static void itemCombiner(String oneItem, String twoItem) {
+
+		oneItemHold = oneItem;
+		twoItemHold = twoItem;
+
+		if(GameTab.getOpen() != TABS.INVENTORY) {
+			GameTab.open(TABS.INVENTORY);
+			PTrain.antibanSleep(89,176);
+		}
+		if(Game.getUptext() != null && Game.getUptext().contains("->")) {
+			clickRandomInventoryItem();
+			PTrain.antibanSleep(196,341);
+		}
+		
+		
+		
+		if(General.random(1,169) == 1) {
+			Mouse.moveBox(firstSpot);
+			closeBankForBankstanding();
+			PTrain.antibanSleep(89,176);
+			
+			Mouse.clickBox(firstSpot, 1);
+			PTrain.antibanSleep(143,179);
+			misclickBox((int)secondSpot.getX(), (int)secondSpot.getY(), (int)secondSpot.getWidth(), (int)secondSpot.getHeight(), 10, 9);
+			PTrain.antibanSleep(89,176);
+			Mouse.clickBox(firstSpot, 1);
+			PTrain.antibanSleep(143,179);
+			Mouse.clickBox(secondSpot, 1);
+		}else {
+			Mouse.moveBox(firstSpot);
+			if(Banking.isBankScreenOpen()) {
+				closeBankForBankstanding();
+			}
+			PTrain.antibanSleep(89,176);
+			Mouse.clickBox(firstSpot, 1);
+			PTrain.antibanSleep(143,179);
+			
+			Mouse.clickBox(secondSpot, 1);
+			PTrain.antibanSleep(89,176);
+		}
+		
+		if(General.random(1,177) != 1) {
+			Mouse.setSpeed(General.random(0, 1));
+			Mouse.moveBox((int)Mouse.getPos().getX() - 200, (int)Mouse.getPos().getY() - 200, 
+					(int)Mouse.getPos().getX() + 40, (int)Mouse.getPos().getY() + 150);
+			Mouse.setSpeed(General.random(110,115));
+			PTrain.antibanSleep(89,176);
+		}
+		PTrain.antibanSleep(89,176);
+		
+		if(GameTab.getOpen() != TABS.INVENTORY) {
+			GameTab.open(TABS.INVENTORY);
+			General.sleep(96,189);
+			if(Player.getPosition().distanceTo(bankingTile) != 0) {
+				if(bankingTile.isClickable()) {
+					bankingTile.click("Walk here");
+					General.sleep(96,189);
+				}
+			}
+			return;
+		}
+		
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return Interfaces.get(270) != null || levelUp();
+					}
+				}, General.random(3728,4128));
+				if(levelUp()) {
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					Keyboard.pressKeys(KeyEvent.VK_SPACE);
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					PTrain.antibanSleep(143,179);
+					return;
+					
+				}
+				if(Interfaces.get(270) != null) {
+					PTrain.antibanSleep(196,279);
+					if(spacebarAvailableForPress()) {
+						if(General.random(1,196) == 1) {
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+							PTrain.antibanSleep(143,179);
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+						}else {
+							Keyboard.pressKeys(KeyEvent.VK_SPACE);
+						}
+						
+					}else {
+						pressProperKeypad();
+					}
+					PTrain.antibanSleep(89,176);
+					if(General.random(1,112) != 1) {
+						Mouse.setSpeed(General.random(0, 1));
+						Mouse.moveBox((int)Mouse.getPos().getX() - 75, (int)Mouse.getPos().getY() - 200, 
+								(int)Mouse.getPos().getX() + 75, (int)Mouse.getPos().getY() + 75);
+						Mouse.setSpeed(General.random(110,115));
+						PTrain.antibanSleep(89,176);
+					}   
+					
+					if(General.random(1,134) == 1) {
+						PTrain.antibanSleep(3240, 7123);
+						Mouse.leaveGame(true);
+					}else {
+						PTrain.antibanSleep(89,176);
+						Mouse.leaveGame(true);
+					}
+					
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(31,51);
+							return Player.getAnimation() != -1;
+						}
+					}, General.random(3400,4100));
+					if(Player.getAnimation() == -1) {
+						return;
+					}
+					disableAntiban = true;
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,33);
+							return Inventory.getCount(twoItemHold) == 0 || 
+									levelUp();
+						}
+					}, General.random(44182,58172));
+					enableAntiban = true;
+					
+					if(levelUp() || Inventory.getCount(twoItemHold) == 0) {
+						PTrain.antibanSleep(4918,5418);
+						randomWaits();
+						
+					}
+					
+				}
+	
+	}
+	
+	public static boolean disableAntiban = false;
+	
+	private static String oneItemHold = "";
+	private static String twoItemHold = "";
+	
+	
+	
+	private static int refocusCount = General.random(0,1);
+	
+	private static void randomWaits() {
+		if(General.random(1,289) == 1) {
+			PTrain.antibanSleep(2541,8182);
+		}
+		
+
+		
+		if(General.random(1,617) == 1) {
+			Mouse.leaveGame(true);
+			PTrain.antibanSleep(2541,8182);
+		}
+		
+		if(General.random(1,540) == 1) {
+			Mouse.leaveGame(true);
+			PTrain.antibanSleep(3400,14234);
+		}
+	}
+	
+	private static String trainingIngredientOne;
+	
+	private static String trainingIngredientTwo;
+	
+	private static void trainFletching() {
+		if(atAreaForSkill()){
+			if(currentSkillTask.contains("BeginningBows")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 5) {
+					PFletching.trainTheSkill("Knife", "Logs", "Arrow shaft");
+				}else {
+					if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 10) {
+						PFletching.trainTheSkill("Knife", "Logs", "Shortbow (u)");
+					}else {
+						if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 20) {
+							PFletching.trainTheSkill("Knife", "Logs", "Longbow (u)");
+						}else {
+							if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 25) {
+								PFletching.trainTheSkill("Knife", "Oak logs", "Oak shortbow (u)");
+							}else {
+								PFletching.trainTheSkill("Knife", "Oak logs", "Oak longbow (u)");
+							}
+						}
+					}
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsWillow")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 40) {
+					PFletching.trainTheSkill("Knife", "Willow logs", "Willow shortbow (u)");
+				}else {
+					PFletching.trainTheSkill("Knife", "Willow logs", "Willow longbow (u)");
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsMaple")) {
+				if(Skills.SKILLS.FLETCHING.getCurrentLevel() < 55) {
+					PFletching.trainTheSkill("Knife", "Maple logs", "Maple shortbow (u)");
+				}else {
+					PFletching.trainTheSkill("Knife", "Maple logs", "Maple longbow (u)");
+				}
+			}
+			if(currentSkillTask.contains("FinalBows")) {
+				PFletching.trainTheSkill("Maple longbow (u)", "Bow string", "Maple longbow");
+			}
+			
+
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	private static void trainFiremaking() {
+		if(atAreaForSkill()){
+			//feed bank booth tile id
+			
+			
+			if(currentSkillTask.contains("BeginningFiremake")) {
+				PFiremaking.trainTheSkill("BeginningFiremake");
+			}
+			if(currentSkillTask.contains("Willow")) {
+				PFiremaking.trainTheSkill("Willow");
+			}
+			if(currentSkillTask.contains("Maple")) {
+				PFiremaking.trainTheSkill("Maple");
+			}
+			
+
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	private static void trainCombat() {
+		if(atAreaForSkill()){
+			//feed bank booth tile id
+			
+			
+			if(currentSkillTask.contains("MossGiantsIsland")) {
+				PCombat.trainTheSkill("MossGiantsIsland");
+			}
+			if(currentSkillTask.contains("MossGiantsIsle")) {
+				PCombat.trainTheSkill("MossGiantsIsle");
+			}
+			if(currentSkillTask.contains("MossGiantsFishingGuild")) {
+				PCombat.trainTheSkill("MossGiantsFishingGuild");
+			}
+			if(currentSkillTask.contains("IceGiants")) {
+				PCombat.trainTheSkill("IceGiants");
+			}
+			if(currentSkillTask.contains("Cyclops")) {
+				PCombat.trainTheSkill("Cyclops");
+			}
+			
+
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	private static void trainCooking() {
+		if(atAreaForSkill()){
+			//feed bank booth tile id
+			
+			if(currentSkillTask.contains("BeginningCook")) {
+				PCooking.trainTheSkill("BeginningCook");
+			}
+			if(currentSkillTask.contains("Lobster")) {
+				PCooking.trainTheSkill("Lobster");
+			}
+			if(currentSkillTask.contains("Monkfish")) {
+				PCooking.trainTheSkill("Monkfish");
+			}
+			if(currentSkillTask.contains("Shark")) {
+				PCooking.trainTheSkill("Shark");
+			}
+			
+
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	private static void trainCrafting() {
+		
+		if(atAreaForSkill()){
+			if(currentSkillTask.contains("BeerGlass")) {
+				PCrafting.trainTheSkill("Glassblowing pipe", "Molten glass", "Beer glass");
+			}
+			if(currentSkillTask.contains("Vial")) {
+				PCrafting.trainTheSkill("Glassblowing pipe", "Molten glass", "Vial");
+			}
+			if(currentSkillTask.contains("Orb")) {
+				PCrafting.trainTheSkill("Glassblowing pipe", "Molten glass", "Unpowered orb");
+			}
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	private static void trainHerblore() {
+		if(atAreaForSkill()){
+			//feed bank booth tile id
+			
+			if(currentSkillTask.contains("RegularAttackPots")) {
+				PHerblore.trainTheSkill("Guam potion (unf)", "Eye of newt", "Attack potion(3)");
+			}
+			if(currentSkillTask.contains("RegularStrengthPots")) {
+				PHerblore.trainTheSkill("Tarromin potion (unf)", "Limpwurt root", "Strength potion(3)");
+			}
+			if(currentSkillTask.contains("SuperAttackPots")) {
+				PHerblore.trainTheSkill("Irit potion (unf)", "Unicorn horn dust", "Super attack potion(3)");
+			}
+			if(currentSkillTask.contains("AntifirePots")) {
+				PHerblore.trainTheSkill("Lantadyme potion (unf)", "Dragon scale dust", "Antifire potion(3)");
+			}
+			
+
+		}else {
+			travelToSkillLocation(selectedSkill);
+		
+		}
+	}
+	
+	
+	
+	private static boolean freshTrainAttempt;
+	
+	private static void useTeleportTab(String name) {
+		RSItem[] tab = Inventory.find(name);
+		if(tab.length > 0) {
+			if(tab[0].click("Break")) {
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return atAreaForSkill();
+					}
+				}, General.random(4900,5400));
+			}
+		}
+	}
+	
+	private static void walkRandomBlindwalk(RSTile a, int randomize){
+		RSTile b;
+		if(General.random(1,3) == 1){
+			b = new RSTile(a.getX() + General.random(1, 2), a.getY() - General.random(1, 2));
+		}else{
+			b = new RSTile(a.getX() - General.random(1, 2), a.getY() + General.random(1, 2));
+		}
+
+		Walking.walkPath(Walking.randomizePath(Walking.generateStraightPath(b), randomize, randomize));
+	}
+	
+	private static void useSkillingTeleportItem(String nameskill) {
+		if(bankstandingLocation.contains("Falador")) {
+			useTeleportTab("Falador teleport");
+		}
+		if(bankstandingLocation.contains("Camelot")) {
+			useTeleportTab("Camelot teleport");
+		}
+	}
+	
+	private static String holdString;
+	
+	private static void togglePlaceholders() {
+		if(!Banking.arePlaceholdersOn()) {
+			RSInterface hey = Interfaces.get(12,38);
+			if(hey != null) {
+				hey.click();
+				General.sleep(369,512);
+			}
+			
+		}
+	}
+	
+	public static void insideBankCheckers() {
+
+		togglePlaceholders();
+		
+				//this is the '?' window of the bank
+				if(Interfaces.get(664,26) != null && !Interfaces.get(664,26).isHidden()) {
+					walkRandomBlindwalk(Player.getPosition(), 0);
+					General.sleep(612,894);
+					return;
+				}
+				
+				//Equipment and settings
+				if(Interfaces.get(12,3) != null && !Interfaces.get(12,3).isHidden()) {
+					if(Interfaces.get(12,3).getText() != null) {
+						holdString = Interfaces.get(12,3).getText();
+						if(holdString != null) {
+							if(holdString.contains("Equip your") || holdString.contains("settings")) {
+								walkRandomBlindwalk(Player.getPosition(), 0);
+								General.sleep(612,894);
+							}
+						}
+					}
+				}
+				
+				if(tabsDisabled()) {
+					collapseTabs();
+				}
+		
+		
+	
+	}
+	
+	private static double scrollHeightHolder;
+	
+	public static void scrollToTopOfBank() {
+		if(!Banking.isBankScreenOpen()) {
+			openNearbyBank();
+		}
+		if(Banking.isBankScreenOpen()) {
+			scrollHeightHolder = 0;
+			RSInterface scrollArea = Interfaces.get(12,14,0);
+			if(scrollArea != null) {
+				//scroll to random point
+				scrollHeightHolder = scrollArea.getAbsoluteBounds().getHeight();
+				Mouse.clickBox((int)(scrollArea.getAbsoluteBounds().getX() + 1), (int)(scrollArea.getAbsoluteBounds().getY() + 1),
+						(int)(scrollArea.getAbsoluteBounds().getX() + scrollArea.getAbsoluteBounds().getWidth() - 2), 
+						(int)(scrollArea.getAbsoluteBounds().getY() + General.random(40, 110)), 1);
+				General.sleep(268,369);
+				
+				//scroll to highest point it can reach
+				scrollHeightHolder = scrollArea.getAbsoluteBounds().getHeight();
+				Mouse.clickBox((int)(scrollArea.getAbsoluteBounds().getX() + 1), (int)(scrollArea.getAbsoluteBounds().getY() + 1),
+						(int)(scrollArea.getAbsoluteBounds().getX() + scrollArea.getAbsoluteBounds().getWidth() - 2), 
+						(int)(scrollArea.getAbsoluteBounds().getY() + General.random(1,6)), 1);
+				General.sleep(268,369);
+				
+				//click the button 
+				
+				RSInterface the = Interfaces.get(12,14,4);
+				if(the != null) {
+				the.click();
+				General.sleep(138,239);
+				}
+				
+			}
+
+		
+		}
+		}
+	
+	public static boolean atTopOfBank() {
+		if(Varcs.getInt(51) == 0 && Banking.isBankScreenOpen()) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static void setWithdrawQuantity(String e) {
+
+		if(Banking.isBankScreenOpen()) {
+			if(e == "All") {
+				RSInterface a = Interfaces.get(12,37);
+				if(a != null) {
+					a.click();
+					General.sleep(89,139);
+		
+				}
+			}
+			if(e == "10") {
+				RSInterface a = Interfaces.get(12,33);
+				if(a != null) {
+					a.click();
+					General.sleep(89,139);
+					
+				}
+			}
+			if(e == "5") {
+				RSInterface the = Interfaces.get(12,31);
+				if(the != null) {
+					the.click();
+					General.sleep(89,139);
+					
+				}
+			}
+			if(e == "1") {
+				RSInterface the = Interfaces.get(12,29);
+				if(the != null) {
+					the.click();
+					General.sleep(89,139);
+					
+				}
+			}
+			if(e == "X") {
+
+				RSInterface a = Interfaces.get(12,35);
+				if(a != null) {
+					Mouse.clickBox(a.getAbsoluteBounds(), 3);
+					General.sleep(396,513);
+				}
+				if(ChooseOption.isOpen()) {
+					if(ChooseOption.isOptionValid("Default quantity: 14")) {
+						ChooseOption.select("Default quantity: 14");
+						General.sleep(396,513);
+						General.sleep(396,513);
+					}else {
+						if(ChooseOption.isOptionValid("Set custom quantity")) {
+							ChooseOption.select("Set custom quantity");
+							General.sleep(396,513);
+							General.sleep(396,513);
+							General.sleep(396,513);
+							Keyboard.typeSend("14");
+							General.sleep(396,513);
+							General.sleep(396,513);
+							General.sleep(396,513);
+						}
+					}
+					
+				}
+			}
+		}
+	
+	}
+	
+	public static boolean tabsDisabled() {
+		
+		if(RSVarBit.get(4171).getValue() == 0) {
+			if(RSVarBit.get(4172).getValue() == 0) {
+				if(RSVarBit.get(4173).getValue() == 0) {
+					if(RSVarBit.get(4174).getValue() == 0) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static void collapseTabs() {
+		if(RSVarBit.get(4171).getValue() != 0) {
+			RSInterface hey = Interfaces.get(12,11,1);
+			if(hey != null) {
+				if(hey.click("Collapse")) {
+					addLongWaitTime();
+				}else {
+					if(hey.click("Collapse")) {
+						addLongWaitTime();
+					}else {
+						if(hey.click("Collapse")) {
+							addLongWaitTime();
+						}
+					}
+				}
+			}
+			addLongWaitTime();
+		}
+		
+		
+		if(RSVarBit.get(4172).getValue() != 0) {
+			RSInterface hey = Interfaces.get(12,11,2);
+			if(hey != null) {
+				if(hey.click("Collapse")) {
+					addLongWaitTime();
+				}else {
+					if(hey.click("Collapse")) {
+						addLongWaitTime();
+					}else {
+						if(hey.click("Collapse")) {
+							addLongWaitTime();
+						}
+					}
+				}
+			}
+			addLongWaitTime();
+		}
+		if(RSVarBit.get(4173).getValue() != 0) {
+			RSInterface hey = Interfaces.get(12,11,3);
+			if(hey != null) {
+				if(hey.click("Collapse")) {
+					addLongWaitTime();
+				}else {
+					if(hey.click("Collapse")) {
+						addLongWaitTime();
+					}else {
+						if(hey.click("Collapse")) {
+							addLongWaitTime();
+						}
+					}
+				}
+			}
+			addLongWaitTime();
+		}
+		if(RSVarBit.get(4174).getValue() != 0) {
+			RSInterface hey = Interfaces.get(12,11,4);
+			if(hey != null) {
+				if(hey.click("Collapse")) {
+					addLongWaitTime();
+				}else {
+					if(hey.click("Collapse")) {
+						addLongWaitTime();
+					}else {
+						if(hey.click("Collapse")) {
+							addLongWaitTime();
+						}
+					}
+				}
+			}
+			addLongWaitTime();
+		}
+	
+	}
+	
+	private static void enableRoofRemoval() {
+		Interfaces.closeAll();
+		addLongWaitTime();
+		walkRandomBlindwalk(Player.getPosition(), 1);
+		addLongWaitTime();
+
+		
+		GameTab.open(TABS.OPTIONS);
+		addLongWaitTime();
+		
+		//click search box
+		if(Interfaces.get(134,11) != null) {
+			Interfaces.get(134,11).click();
+			addLongWaitTime();
+		}
+		Keyboard.typeString("roof");
+		addLongWaitTime();
+		
+		//the only interface to show up in search
+		RSInterface se = Interfaces.get(134,18,1);
+		if(se != null) {
+			se.click();
+			addLongWaitTime();
+		}
+		
+		Interfaces.closeAll();
+		addLongWaitTime();
+		General.sleep(196,329);
+		if(Interfaces.get(134,4) != null) {
+			Interfaces.get(134,4).click();
+			addLongWaitTime();
+		}
+		/*
+		while(true) {
+			if(Options.setRemoveRoofsEnabled(true)) {
+				break;
+			}
+			General.sleep(35,44);
+		}
+		*/
+	}
+	
+	private static void enableEscapeButton() {
+		Interfaces.closeAll();
+		addLongWaitTime();
+		walkRandomBlindwalk(Player.getPosition(), 1);
+		addLongWaitTime();
+
+		
+		GameTab.open(TABS.OPTIONS);
+		addLongWaitTime();
+		
+		//click search box
+		if(Interfaces.get(134,11) != null) {
+			Interfaces.get(134,11).click();
+			addLongWaitTime();
+		}
+		Keyboard.typeString("esc");
+		addLongWaitTime();
+		
+		//the only interface to show up in search
+		RSInterface se = Interfaces.get(134,18,1);
+		if(se != null) {
+			se.click();
+			addLongWaitTime();
+		}
+		
+		Interfaces.closeAll();
+		addLongWaitTime();
+		General.sleep(196,329);
+		if(Interfaces.get(134,4) != null) {
+			Interfaces.get(134,4).click();
+			addLongWaitTime();
+		}
+	
+	}
+	
+	private static void disableStoreIcon() {
+		Interfaces.closeAll();
+		addLongWaitTime();
+		walkRandomBlindwalk(Player.getPosition(), 1);
+		addLongWaitTime();
+
+		
+		GameTab.open(TABS.OPTIONS);
+		addLongWaitTime();
+		
+		//click search box
+		if(Interfaces.get(134,11) != null) {
+			Interfaces.get(134,11).click();
+			addLongWaitTime();
+		}
+		Keyboard.typeString("show the st");
+		addLongWaitTime();
+		
+		//the only interface to show up in search
+		RSInterface se = Interfaces.get(134,18,1);
+		if(se != null) {
+			se.click();
+			addLongWaitTime();
+		}
+		
+		Interfaces.closeAll();
+		addLongWaitTime();
+		General.sleep(196,329);
+		if(Interfaces.get(134,4) != null) {
+			Interfaces.get(134,4).click();
+			addLongWaitTime();
+		}
+	
+	}
+	
+	private static int runEnergyReset = General.random(13, 28);
+	
+	public static void outsideBankCheckers() {
+		if(Interfaces.isInterfaceSubstantiated(553,6)) {
+			walkRandomBlindwalk(Player.getPosition(), 1);
+			addLongWaitTime();
+		}
+	
+		
+		if(Game.getRoofsEnabledStatus() == Game.RoofStatus.BEING_DRAWN) {
+			enableRoofRemoval();
+		}
+		
+
+		if(Game.getSetting(1224) == 172395585 || 
+				RSVarBit.get(4681).getValue() != 1) {
+			enableEscapeButton();
+		}
+		
+		
+		if(!Options.isRunEnabled() && !Banking.isBankScreenOpen()) {
+			if(Game.getRunEnergy() >= runEnergyReset &&  (Game.getUptext() != null && !Game.getUptext().contains("->"))) {
+				runEnergyReset = General.random(13,28);
+				Options.setRunEnabled(true);
+				General.sleep(196,329);
+			}
+		}
+		
+		
+		if(Interfaces.get(233,3) != null && !Interfaces.get(233,3).isHidden()) {
+			if(General.random(1,3) == 1) {
+				walkRandomBlindwalk(Player.getPosition(), 1);
+				General.sleep(196,329);
+			}else {
+				Interfaces.get(233,3).click();
+				General.sleep(196,329);
+			}
+		}
+		
+	
+			if(RSVarBit.get(13037).getValue() != 0) {
+				
+					Mouse.setSpeed(General.random(15, 40));
+					disableStoreIcon();
+					
+			}
+			
+			turnSound();
+			
+			if(!correctZoom()){
+				fixZoom();
+			}
+			
+			handleBrightness();
+			
+			//chatbox hidden?
+			if(!Interfaces.get(162,55).isHidden()) {
+				Mouse.clickBox(11,709,52,704,1);
+				General.sleep(196,329);
+				General.sleep(196,329);
+				if(!Interfaces.get(162,55).isHidden()) {
+					Mouse.clickBox(11,709,52,704,1);
+					General.sleep(196,329);
+				}
+			}
+			
+			
+			if(Interfaces.isInterfaceSubstantiated(84) || 
+					Interfaces.isInterfaceSubstantiated(464) || 
+					Interfaces.isInterfaceSubstantiated(4)){
+				walkRandomBlindwalk(Player.getPosition(), 1);
+				addLongWaitTime();
+			}
+			
+			
+			if(Interfaces.isInterfaceSubstantiated(214)) {
+				walkRandomBlindwalk(Player.getPosition(), 0);
+				addLongWaitTime();
+			}
+			
+	
+			if(Interfaces.isInterfaceSubstantiated(119)) {
+				Walking.blindWalkTo(Player.getPosition());
+				addLongWaitTime();
+			}
+			
+			
+			if(Interfaces.isInterfaceSubstantiated(595)) {
+				RSInterface close = Interfaces.get(595,38);
+				if(close != null) {
+					close.click();
+					addLongWaitTime();
+					addLongWaitTime();
+				}
+			}
+			//remove uptext
+			if(Game.getUptext() != null && Game.getUptext().contains("->")) {
+				clickOffUptext();
+			}
+		
+	
+	}
+	
+	private static void turnSound() {
+		if(Game.getSetting(168) != 0) {
+			GameTab.open(TABS.OPTIONS);
+			General.sleep(196,329);
+			Mouse.clickBox(679,397,718,412,1);
+			General.sleep(196,329);
+			Mouse.clickBox(617,457,644,482,1);
+			General.sleep(196,329);
+		}
+		
+		if(Game.getSetting(169) != 0) {
+			GameTab.open(TABS.OPTIONS);
+			General.sleep(196,329);
+			Mouse.clickBox(679,397,718,412,1);
+			General.sleep(196,329);
+			Mouse.clickBox(619,502,641,522,1);
+			General.sleep(196,329);
+		}
+		
+		if(Game.getSetting(872) != 0) {
+			GameTab.open(TABS.OPTIONS);
+			General.sleep(196,329);
+			Mouse.clickBox(679,397,718,412,1);
+			General.sleep(196,329);
+			Mouse.clickBox(621,546,644,567,1);
+			General.sleep(196,329);
+		}
+	}
+	
+	private static void clickOffUptext() {
+
+		if(Inventory.getAll().length > 0) {
+			RSItem[] ooh = Inventory.getAll();
+			if(ooh.length > 0) {
+				ooh[0].click();
+				General.sleep(196,329);
+			}
+		}else {
+			walkRandomBlindwalk(Player.getPosition(), 0);
+			addLongWaitTime();
+		}
+	
+	}
+	
+	private static boolean correctZoom() {
+		return Camera.getZoomPercent() == -0.0;
+		/*
+		if(Interfaces.get(116,99) != null) {
+			return Interfaces.get(116,99).getAbsoluteBounds().getX() <= 623;
+		}
+		*/
+	
+	}
+	
+	private static void handleBrightness() {
+		if(Game.getSetting(166) != 100) {
+			Interfaces.closeAll();
+			GameTab.open(TABS.OPTIONS);
+			addLongWaitTime();
+			Mouse.clickBox(742,399,780,412,1);
+			addLongWaitTime();
+			Mouse.clickBox(706,463,720,470,1);
+			addLongWaitTime();
+			Mouse.clickBox(765,465,766,467,1);
+			addLongWaitTime();
+			GameTab.open(TABS.INVENTORY);
+			General.sleep(196,329);
+		}
+	}
+	
+	private static void fixZoom() {
+	
+		if (RSVarBit.get(6357).getValue() != 0) {
+
+			GameTab.open(TABS.OPTIONS);
+			addLongWaitTime();
+			Mouse.clickBox(745,397,778,413,1);
+			addLongWaitTime();
+			Mouse.clickBox(619,495,641,518,1);
+			addLongWaitTime();
+		
+		}else {
+			Mouse.moveBox(231,186,447,331);
+			addLongWaitTime();
+			for(int i = 0; i < 6; i++) {
+				if(!correctZoom()) {
+					Mouse.scroll(false,General.random(2, 4));
+					addLongWaitTime();
+					General.sleep(196,329);
+				}
+			}
+			
+			
+		}
+	}
+	
+	private static void travelToSkillLocation(String nameOfSkill) {
+		if(Inventory.getCount(bankstandingTeleportItem) > 0 && !Banking.isBankScreenOpen() && !PrivateExchangeBuyerResize.geOpen()) {
+		
+			useSkillingTeleportItem(nameOfSkill);
+		}else {
+			if(Banking.isBankScreenOpen()) {
+				if(Equipment.getItems().length > 0) {
+					Banking.depositEquipment();
+					General.sleep(86,156);			
+				}
+				if(Inventory.getAll().length != 0) {
+					Banking.depositAll();
+					General.sleep(86,156);			
+				}
+				
+				if(Game.getSetting(115) == 1) {
+					Mouse.clickBox(164,542,197,555,1);
+					General.sleep(1612,1912);
+				}
+				
+				if(Inventory.getCount(bankstandingTeleportItem) == 0) {
+					Banking.withdraw(1, bankstandingTeleportItem);
+					General.sleep(86,156);	
+				}
+				Banking.close();
+				General.sleep(86,156);
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return Inventory.getCount(bankstandingTeleportItem) > 0;
+					}
+				}, General.random(3400,4100));
+				
+				
+			}else {
+				if(PrivateExchangeBuyerResize.geOpen()) {
+					PrivateExchangeBuyerResize.closeGE();
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,33);
+							return !PrivateExchangeBuyerResize.geOpen();
+						}
+					}, General.random(3134,3812));
+				}else {
+					openNearbyBank();
+				}
+				
+			}
+		}
+		
+		
+	
+	}
+	
+	private static String bankstandingLocation;
+	
+	private static String bankstandingTeleportItem;
+	
+	private static RSTile bankingTile;
+	
+	private static void setRandomBankLocation() {
+		int b = General.random(1, 2);
+		if(b == 1) {
+			bankstandingLocation = "Falador";
+			bankstandingTeleportItem = "Falador teleport";
+			//west
+			bankingTile = new RSTile(General.random(2946, 2948),3367);
+			//east
+			bankingTile = new RSTile(General.random(3011,3014),3354);
+		}
+		if(b == 2) {
+			bankstandingLocation = "Camelot";
+			bankstandingTeleportItem = "Camelot teleport";
+			bankingTile = new RSTile(General.random(2809, 2811),3442);
+			bankingTile = new RSTile(General.random(2727, 2729),3494);
+		}
+	}
+	
+	private static boolean atArea(RSArea a){
+		return a.contains(Player.getPosition());
+	}
+	
+	private static final RSArea varrock = 
+			new RSArea(new RSTile(3145,3466,0), new RSTile(3272, 3408, 0));
+	
+	private static final RSArea falador = 
+			new RSArea(new RSTile(2936,3395,0), new RSTile(3046,3331,0));
+	
+	private static final RSArea camelot = 
+			new RSArea(new RSTile(2695,3523,0), new RSTile(2830,3410,0));
+	
+	private static boolean atAreaForSkill(){
+		
+		if(bankstandingLocation.contains("Falador")) {
+			return	atArea(falador);
+		}
+		if(bankstandingLocation.contains("Camelot")) {
+			return atArea(camelot);
+		}
+		return false;
+	}
+	
+	private static int currentSkillLevel;
+	
+	public static String currentSkillTask = "";
+	
+	private static final RSArea grandexchange = 
+			new RSArea(new RSTile(3100, 3460, 0), new RSTile(3260, 3540, 0));
+	
+	
+	
+	private static String[] usedRingOfWealthIDs = {"Ring of wealth (4)",
+			"Ring of wealth (3)", "Ring of wealth (2)", "Ring of wealth (1)"};
+	
+	private static String[] ringOfWealthIDs = {"Ring of wealth (5)", "Ring of wealth (4)",
+			"Ring of wealth (3)", "Ring of wealth (2)", "Ring of wealth (1)"};
+	
+	private static ArrayList<String> restockItems = new ArrayList<String>();
+	
+	private static ArrayList<String> restockItemsHold = new ArrayList<String>();
+	
+	private static boolean checkedForRestockItems;
+	
+	private static int desiredQuant;
+	
+	private static boolean itemQuantityRandomized;
+	
+	private static String editableStockItemString;
+	
+	private static String editableStockItemQuantity;
+	
+	private static boolean hasAllRestockableItems() {
+		int successCount = 0;
+		for(int i = 0; i < restockItems.size(); i++) {
+			String holdString = restockItems.get(i);
+			
+			editableStockItemString = holdString.substring(0, holdString.indexOf("!"));
+			holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+			editableStockItemBaseValue = holdString.substring(0, holdString.indexOf("!"));
+			holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+			editableStockItemQuantity = holdString.substring(0, holdString.indexOf("!"));
+			holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+			
+			RSItem[] goo = Inventory.find(editableStockItemString);
+			if(goo.length > 0 && goo[0].getStack() >= Integer.parseInt(editableStockItemQuantity)) {
+				successCount++;
+			}
+		}
+		if(successCount >= restockItems.size()) {
+			successCount = 0;
+			return true;
+		}
+		successCount = 0;
+		return false;
+	}
+	
+	private static void updateEditableRestockStrings(int startIndex) {
+		//"Testitem!5!1!0
+		String holdString = restockItemsHold.get(startIndex);
+		
+		General.println(holdString);
+		editableStockItemString = holdString.substring(0, holdString.indexOf("!"));
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		editableStockItemBaseValue = holdString.substring(0, holdString.indexOf("!"));
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		editableStockItemQuantity = holdString.substring(0, holdString.indexOf("!"));
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		editableStockItemRandomization = holdString.substring(0, holdString.length());
+		
+	}
+	
+	private static String editableStockItemBaseValue;
+	
+	private static void parseRestockInputList(String item) {
+		String holdString = item;
+		
+		editableStockItemString = holdString.substring(0, holdString.indexOf("!"));
+		General.println("Stock item: " + editableStockItemString);
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		General.println("Current... " + holdString);
+		editableStockItemBaseValue = holdString.substring(0, holdString.indexOf("!"));
+		General.println("Base value: " + editableStockItemBaseValue);
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		editableStockItemQuantity = holdString.substring(0, holdString.indexOf("!"));
+		General.println("Quantity: " + editableStockItemQuantity);
+		holdString = holdString.substring(holdString.indexOf("!") + 1, holdString.length());
+		editableStockItemRandomization = holdString.substring(0, holdString.length());
+		General.println("Randomization: " + editableStockItemRandomization);
+	}
+	
+	
+	private static String editableStockItemRandomization;
+	
+	
+	//format: new String[]{"itemname!base!desired!randomization", 0   };
+	private static void restockSupplyItems(String[] listy) {
+		
+		if(atArea(grandexchange)) {
+			if(hasAllRestockableItems()) {
+				if(PrivateExchangeBuyerResize.geOpen()) {
+					PrivateExchangeBuyerResize.closeGE();
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,33);
+							return !PrivateExchangeBuyerResize.geOpen();
+						}
+					}, General.random(2322,2812));
+				}else {
+					readyToTrain = true;
+				}
+			}else {
+				if(PrivateExchangeBuyerResize.geOpen()) {
+					if(restockItemsHold.size() > 0) {
+						updateEditableRestockStrings(0);
+					
+						if(Inventory.getCount(editableStockItemString) > 0) {
+							restockItemsHold.remove(0);
+							return;
+						}
+
+					PrivateExchangeBuyerResize.buyGeItemSimpleInsta(editableStockItemString, editableStockItemString.toLowerCase(), editableStockItemString.toLowerCase(), editableStockItemString.toLowerCase(), editableStockItemString,
+							(Integer.parseInt(editableStockItemQuantity) + (General.random(0, Integer.parseInt(editableStockItemRandomization)    ))));
+					
+
+					}
+					
+				}else {
+					PrivateExchangeBuyerResize.openExchange();
+				}
+			}
+		}else {
+			
+			if(!checkedForRestockItems) {
+				General.println("SCAnner");
+				if(Banking.isBankScreenOpen()) {
+					scanForRestockableItems(bankstandingTeleportItem, General.random(9,16), General.random(15, 20), General.random(1, 6));
+					
+					for(int i = 0; i < listy.length; i++) {
+						
+						parseRestockInputList(listy[i]);
+						
+						scanForRestockableItems(editableStockItemString, Integer.parseInt(editableStockItemBaseValue), Integer.parseInt(editableStockItemQuantity), Integer.parseInt(editableStockItemRandomization));
+					}
+					General.sleep(1412,2912);
+					if(!Banking.isBankScreenOpen()) {
+						openNearbyBank();
+					}
+					if(Banking.isBankScreenOpen()) {
+						scanForRestockableItems(bankstandingTeleportItem, General.random(9,16), General.random(15, 20), General.random(1, 6));
+						
+						for(int i = 0; i < listy.length; i++) {
+							parseRestockInputList(listy[i]);
+							scanForRestockableItems(editableStockItemString, Integer.parseInt(editableStockItemBaseValue), Integer.parseInt(editableStockItemQuantity), Integer.parseInt(editableStockItemRandomization));
+						}
+						restockItemsHold = restockItems;
+						checkedForRestockItems = true;
+					}
+					
+				}else {
+					openNearbyBank();
+				}
+			}else {
+				if(restockingItems) {
+					if(Equipment.getItems().length == 0 && Inventory.getAll().length == 2 && 
+							Inventory.getCount("Coins") > 0 && !Banking.isBankScreenOpen() && 
+							Inventory.getCount(ringOfWealthIDs) > 0) {
+						
+						teleportToGrandExchange();
+					}else {
+						if(Banking.isBankScreenOpen()) {
+							if(Inventory.getAll().length > 0) {
+							Banking.depositAll();
+							General.sleep(69,126);
+							}
+							if(Equipment.getItems().length > 0) {
+							Banking.depositEquipment();
+							General.sleep(69,126);
+							}
+							Banking.withdraw(0, "Coins");
+							General.sleep(69,126);
+							
+							if(Game.getSetting(115) == 1) {
+
+								Mouse.clickBox(164,542,197,555,1);
+								General.sleep(1612,1912);
+							
+							}
+							
+							RSItem[] usedRings = Banking.find(usedRingOfWealthIDs);
+							if(usedRings.length > 0) {
+								
+								Banking.withdraw(1, usedRingOfWealthIDs);
+								General.sleep(69,126);
+							}else {
+								Banking.withdraw(1, "Ring of wealth (5)");
+								General.sleep(69,126);
+							}
+							
+							Banking.close();
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(19,33);
+									return !Banking.isBankScreenOpen() && Inventory.getCount(ringOfWealthIDs) > 0 && 
+											Inventory.getCount("Coins") > 0 && Inventory.getAll().length == 2;
+								}
+							}, General.random(2121,2612));
+						}else {
+							openNearbyBank();
+						}
+					}
+				}else {
+					readyToTrain = true;
+				}
+			}
+			
+			
+			
+		}
+
+		
+	
+	
+		
+	}
+	
+	private static boolean readyToTrain;
+	
+	private static String[] craftingItemsToSell = {"Molten glass", "Unpowered orb", 
+			"Vial", "Beer glass", };
+	
+	private static String[] fletchingItemsToSell = {"Logs", "Oak logs", 
+			"Willow logs", "Maple logs", "Yew logs", "Shortbow", "Longbow", "Oak shortbow", "Oak longbow", "Willow shortbow", "Willow longbow", "Maple shortbow", 
+			"Maple longbow", "Yew shortbow", "Yew longbow", "Bow string"};
+	
+	private static String[] cookingItemsToSell = {"Raw tuna", "Tuna", 
+			"Raw shrimps", "Shrimps", "Raw trout", "Trout", "Raw lobster", "Lobster", "Raw monkfish", "Monkfish", "Raw shark", "Shark"};
+	
+	private static String[] firemakingItemsToSell = {"Logs", "Oak logs", 
+			"Willow logs", "Maple logs",};
+	
+	private static String[] combatItemsToSell = {"Super attack potion(4)", "Super defence potion(4)", 
+			"Super strength potion(4)", "Shark",};
+	
+	private static void handleCombatItemPurchasing() {
+		//not public
+	}
+	
+	private static void handleTrainingRestock(String curUsr, String curPass, String resetURL) {
+		restockItems.clear();
+		restockItemsHold.clear();
+		checkedForRestockItems = false;
+		readyToTrain = false;
+		itemQuantityRandomized = false;
+		xpFailsafeStartTime = Timing.currentTimeMillis();
+		while(true) {
+			if(doneSkilling) {
+				break;
+			}
+			handleLogins(curUsr,curPass,resetURL);
+			currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+			if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+				doneSkilling = true;
+				break;
+			}
+			if(NewMagicRunes.pendingOffersGEStopper) {
+				General.println("Ge stop");
+				break;
+			}
+			if(selectedSkill.contains("Herblore")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("RegularAttackPots")) {
+					restockSupplyItems(new String[]{"Guam potion (unf)!2000!2000!60", "Eye of newt!2000!2000!60"});
+				}
+				
+				if(currentSkillTask.contains("RegularStrengthPots")) {
+					restockSupplyItems(new String[]{"Tarromin potion (unf)!2000!2000!60", "Limpwurt root!2000!2000!60"});
+				}
+				
+				if(currentSkillTask.contains("SuperAttackPots")) {
+					restockSupplyItems(new String[]{"Irit potion (unf)!2000!2000!60", "Unicorn horn dust!2000!2000!60"});
+				}
+				
+				if(currentSkillTask.contains("AntifirePots")) {
+					restockSupplyItems(new String[]{"Lantadyme potion (unf)!2000!2000!60", "Dragon scale dust!2000!2000!60"});
+				}
+				
+			}
+			
+			if(selectedSkill.contains("Crafting")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("BeerGlass")) {
+					restockSupplyItems(new String[]{"Molten glass!2000!2000!60", "Glassblowing pipe!1!1!0"});
+				}
+				
+				if(currentSkillTask.contains("Vial")) {
+					restockSupplyItems(new String[]{"Molten glass!2000!2000!60", "Glassblowing pipe!1!1!0"});
+				}
+				
+				if(currentSkillTask.contains("Orb")) {
+					restockSupplyItems(new String[]{"Molten glass!2000!2000!60", "Glassblowing pipe!1!1!0"});
+				}
+				
+				
+				
+			}
+			
+			if(selectedSkill.contains("Fletching")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("BeginningBows")) {
+					//fletching <= 35
+					restockSupplyItems(new String[]{"Knife!1!1!0", "Logs!800!800!35","Oak logs!1900!1900!35"});
+				}
+				
+				
+				
+				if(currentSkillTask.contains("MiddleBowsWillow")) {
+					//fletching <=50
+					restockSupplyItems(new String[]{"Knife!1!1!0", "Willow logs!2700!2700!35"});
+				}
+				
+				if(currentSkillTask.contains("MiddleBowsMaple")) {
+					//fletching <=55
+					restockSupplyItems(new String[]{"Knife!1!1!0", "Maple logs!2700!2700!35"});
+				}
+				
+				if(currentSkillTask.contains("FinalBows")) {
+					//fletching <=99, string maple longbow
+					restockSupplyItems(new String[]{"Maple logs!2700!2700!35","Bow string!2700!2700!35",});
+				}
+				
+				
+				
+			}
+			
+			if(selectedSkill.contains("Cooking")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("BeginningCook")) {
+					//fletching <= 35
+					restockSupplyItems(new String[]{"Nardah teleport!1!1!0", "Raw shrimps!400!400!60","Raw trout!650!650!60","Raw tuna!1000!1000!60",});
+				}
+				
+				if(currentSkillTask.contains("Lobster")) {
+					//fletching <=50
+					restockSupplyItems(new String[]{"Nardah teleport!1!1!0", "Raw lobster!1800!1800!60",});
+				}
+				
+				if(currentSkillTask.contains("Monkfish")) {
+					//fletching <=55
+					restockSupplyItems(new String[]{"Nardah teleport!1!1!0", "Raw monkfish!1800!1800!60",});
+				}
+				
+				if(currentSkillTask.contains("Shark")) {
+					//fletching <=99
+					restockSupplyItems(new String[]{"Nardah teleport!1!1!0", "Raw shark!1800!1800!60",});
+				}
+				
+				
+				
+			}
+			
+			if(selectedSkill.contains("Firemaking")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("BeginningFiremake")) {
+					//fletching <= 35
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Logs!200!200!60","Oak logs!300!300!60",});
+				}
+				
+				if(currentSkillTask.contains("Willow")) {
+					//fletching <=50
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Willow logs!1800!1800!60",});
+				}
+				
+				if(currentSkillTask.contains("Maple")) {
+					//fletching <=55
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Maple logs!1800!1800!60",});
+				}
+				
+				
+			}
+			
+			if(selectedSkill.contains("Combat")) {
+				if(readyToTrain) {
+					
+					restockItems.clear();
+					restockItemsHold.clear();
+					readyToTrain = false;
+					restockingItems = false;
+					break;
+				}
+				
+				General.println(currentSkillTask);
+				
+				if(currentSkillTask.contains("MossGiants")) {
+					//fletching <= 35
+					handleCombatItemPurchasing();
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Logs!200!200!60","Oak logs!300!300!60",});
+				}
+				
+				if(currentSkillTask.contains("IceGiants")) {
+					//fletching <=50
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Willow logs!1800!1800!60",});
+				}
+				
+				if(currentSkillTask.contains("Cyclops")) {
+					//fletching <=55
+					restockSupplyItems(new String[]{"Tinderbox!1!1!0", "Maple logs!1800!1800!60",});
+				}
+				
+				
+			}
+			
+			General.sleep(19,33);
+		}
+		itemQuantityRandomized = false;
+		//deposit purchased items
+		xpFailsafeStartTime = Timing.currentTimeMillis();
+		while(true) {
+			handleLogins(curUsr,curPass,resetURL);
+			currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+			if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+				doneSkilling = true;
+				break;
+			}
+			if(doneSkilling) {
+				break;
+			}
+			if(Inventory.getAll().length == 0 && Banking.isBankScreenOpen()) {
+				break;
+			}
+			if(PrivateExchangeBuyerResize.geOpen()) {
+				PrivateExchangeBuyerResize.closeGE();
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return !PrivateExchangeBuyerResize.geOpen();
+					}
+				}, General.random(2734,3412));
+			}
+			
+			if(Banking.isBankScreenOpen()) {
+				Banking.depositAll();
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(19,33);
+						return Inventory.getAll().length == 0;
+					}
+				}, General.random(2834,3424));
+			}else {
+				openNearbyBank();
+			}
+			
+			General.sleep(19,33);
+		}
+	}
+	
+	private static String currentFirstItem;
+	
+	private static String currentItem;
+	
+	
+	
+	private static void determineSkillTask(String theSkill) {
+		
+		if(theSkill.contains("Herblore")) {
+			currentSkillLevel = Skills.SKILLS.HERBLORE.getActualLevel();
+			
+			if(currentSkillLevel < 12 && currentSkillLevel > 0) {
+				currentSkillTask = "RegularAttackPots";
+				trainingIngredientOne = "Guam potion (unf)";
+				trainingIngredientTwo = "Eye of newt";
+			}
+
+			if(currentSkillLevel < 45 && currentSkillLevel >= 12) {
+				currentSkillTask = "RegularStrengthPots";
+				trainingIngredientOne = "Tarromin potion (unf)";
+				trainingIngredientTwo = "Limpwurt root";
+			}
+			
+			if(currentSkillLevel < 69 && currentSkillLevel >= 45) {
+				currentSkillTask = "SuperAttackPots";
+				trainingIngredientOne = "Irit potion (unf)";
+				trainingIngredientTwo = "Unicorn horn dust";
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 69) {
+				currentSkillTask = "AntifirePots";
+				trainingIngredientOne = "Lantadyme potion (unf)";
+				trainingIngredientTwo = "Dragon scale dust";
+			}
+		}
+
+		if(theSkill.contains("Crafting")) {
+			currentSkillLevel = Skills.SKILLS.CRAFTING.getActualLevel();
+			
+			if(currentSkillLevel < 33 && currentSkillLevel > 0) {
+				currentSkillTask = "BeerGlass";
+			}
+			
+			if(currentSkillLevel < 46 && currentSkillLevel >= 33) {
+				currentSkillTask = "Vial";
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 46) {
+				currentSkillTask = "Orb";
+			}
+		}
+		
+		if(theSkill.contains("Fletching")) {
+			currentSkillLevel = Skills.SKILLS.FLETCHING.getActualLevel();
+			
+			if(currentSkillLevel < 35 && currentSkillLevel > 0) {
+				currentSkillTask = "BeginningBows";
+			}
+			
+			if(currentSkillLevel < 50 && currentSkillLevel >= 35) {
+				currentSkillTask = "MiddleBowsWillow";
+			}
+			
+			if(currentSkillLevel < 65 && currentSkillLevel >= 50) {
+				currentSkillTask = "MiddleBowsMaple";
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 65) {
+				currentSkillTask = "FinalBows";
+			}
+		}
+		
+		if(theSkill.contains("Cooking")) {
+			currentSkillLevel = Skills.SKILLS.COOKING.getActualLevel();
+			
+			if(currentSkillLevel < 40 && currentSkillLevel > 0) {
+				currentSkillTask = "BeginningCook";
+			}
+			
+			if(currentSkillLevel < 62 && currentSkillLevel >= 40) {
+				currentSkillTask = "Lobster";
+			}
+			
+			if(currentSkillLevel < 80 && currentSkillLevel >= 62) {
+				currentSkillTask = "Monkfish";
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 80) {
+				currentSkillTask = "Shark";
+			}
+		}
+		
+		if(theSkill.contains("Firemaking")) {
+			currentSkillLevel = Skills.SKILLS.FIREMAKING.getActualLevel();
+			
+			if(currentSkillLevel < 30 && currentSkillLevel > 0) {
+				currentSkillTask = "BeginningFiremake";
+			}
+			
+			if(currentSkillLevel < 45 && currentSkillLevel >= 30) {
+				currentSkillTask = "Willow";
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 45) {
+				currentSkillTask = "Maple";
+			}
+		}
+		
+		if(theSkill.contains("Combat")) {
+			currentSkillLevel = Skills.SKILLS.DEFENCE.getActualLevel();
+
+			if(currentSkillLevel < 60 && currentSkillLevel > 0) {
+				int i = General.random(1, 3);
+				if(i == 1) {
+					currentSkillTask = "MossGiantsIsland";
+				}
+				if(i == 2) {
+					currentSkillTask = "MossGiantsIsle";
+				}
+				if(i == 3) {
+					currentSkillTask = "MossGiantsFishingGuild";
+				}
+				
+			}
+			
+			if(currentSkillLevel < 100 && currentSkillLevel >= 60) {
+				int i = General.random(1, 2);
+				if(i == 1) {
+					currentSkillTask = "IceGiants";
+				}
+				if(i == 2) {
+					currentSkillTask = "Cyclops";
+				}
+			}
+		}
+	}
+	
+	private static boolean restockingItems;
+	
+	private static void scanForRestockableItems(String nameofitem, int baseQuantity, int purchaseQuantity, int randomization) {
+		RSItem[] item = Banking.find(nameofitem);
+		
+		if(item.length > 0) {
+			if(item[0].getStack() >= baseQuantity) {
+				
+			}else {
+				restockingItems = true;
+				int matchItems = 0;
+				for(int i = 0; i < restockItems.size(); i++) {
+					if(restockItems.get(i).contains(nameofitem)) {
+						matchItems++;
+					}
+				}
+				if(matchItems == 0) {
+					restockItems.add(nameofitem + "!" + baseQuantity + "!" + purchaseQuantity + "!" + randomization);
+				}
+				
+				matchItems = 0;
+			}
+		}else {
+			restockingItems = true;
+			int matchItems = 0;
+			for(int i = 0; i < restockItems.size(); i++) {
+				if(restockItems.get(i).contains(nameofitem)) {
+					matchItems++;
+				}
+			}
+			if(matchItems == 0) {
+				restockItems.add(nameofitem + "!" + baseQuantity + "!" + purchaseQuantity + "!" + randomization);
+			}
+			
+			matchItems = 0;
+		}
+	}
+	
+	
+	
+	private static Rectangle firstSpot = new Rectangle(669,514,19,22);
+	private static Rectangle secondSpot = new Rectangle(706,514,21,15);
+	
+	private static void failsafeChecks() {
+		if(atArea(new RSArea(new RSTile(2700,3500,1), new RSTile(2750,3480)))) {
+			RSObject[] hey = Objects.findNearest(20, "Stairs");
+			if(hey.length > 0) {
+				
+				walkRandomBlindwalk(Player.getPosition(), 2);
+				General.sleep(392,1912);
+				hey[0].click();
+				General.sleep(1640,2241);
+				while(Player.isMoving()) {
+					General.sleep(19,33);
+				}
+				General.sleep(5340,7122);
+			}
+			
+		}
+	}
+	
+	private static void hoverToBankSpot(String skilly) {
+		if(skilly.contains("Herblore")) {
+			Mouse.moveBox((int)quickDepositBox.getX(), (int)quickDepositBox.getY(), 
+					(int)quickDepositBox.getX(), (int)quickDepositBox.getY());
+		}
+		if(skilly.contains("Crafting")) {
+			Mouse.moveBox((int)depositItemBox.getX(), (int)depositItemBox.getY(), 
+					(int)depositItemBox.getX(), (int)depositItemBox.getY());
+		}
+		if(skilly.contains("Fletching")) {
+			if(currentSkillTask.contains("FinalBows")) {
+				Mouse.moveBox((int)quickDepositBox.getX(), (int)quickDepositBox.getY(), 
+						(int)quickDepositBox.getX(), (int)quickDepositBox.getY());
+			}else {
+				Mouse.moveBox((int)depositItemBox.getX(), (int)depositItemBox.getY(), 
+						(int)depositItemBox.getX(), (int)depositItemBox.getY());
+			}
+			
+		}
+	}
+	
+	private static void setRandomItemClickingSpotsBankstanding(String skill) {
+		
+		if(skill.contains("Herblore")) {
+			int a = General.random(1,4);
+			if(a == 1) {
+	
+				firstSpot = new Rectangle(669,514,19,22);
+				secondSpot = new Rectangle(706,514,21,15);
+			}
+			if(a == 2) {
+			
+				firstSpot = new Rectangle(669,514,19,22);
+				secondSpot = new Rectangle(706,514,21,15);
+			
+			}
+			if(a == 3) {
+
+				firstSpot = new Rectangle(663,512,23,22);
+				secondSpot = new Rectangle(665,549,20,17);
+			
+			}
+			if(a == 4) {
+				firstSpot = new Rectangle(627,514,16,19);
+				secondSpot = new Rectangle(624,550,18,15);
+			
+			}
+			
+			int b = General.random(1, 10);
+			if(b <= 7) {
+		
+				depositItemBox = new Rectangle(625,405,20,20);
+			}else {
+				if(General.random(1,2) == 1) {
+					depositItemBox = new Rectangle(625,441,20,20);
+				}else {
+					depositItemBox = new Rectangle(625,477,20,20);
+				}
+			}
+		}
+
+		if(skill.contains("Crafting")) {
+			int a = General.random(1,2);
+			if(a == 1) {
+			
+				firstSpot = new Rectangle(625,405,20,20);
+				secondSpot = new Rectangle(665,402,691,429);
+			}
+			if(a == 2) {
+				
+				firstSpot = new Rectangle(625,405,20,20);
+				secondSpot = new Rectangle(625,441,20,20);
+			
+			}
+			
+
+
+			if(General.random(1,2) == 1) {
+				depositItemBox = new Rectangle(665,402,691,429);
+			}else {
+				depositItemBox = new Rectangle(625,441,20,20);
+			}
+		
+		}
+		
+		if(skill.contains("Fletching")) {
+			int a = General.random(1,2);
+			if(a == 1) {
+			
+				firstSpot = new Rectangle(625,405,20,20);
+				secondSpot = new Rectangle(665,402,691,429);
+			}
+			if(a == 2) {
+				
+				firstSpot = new Rectangle(625,405,20,20);
+				secondSpot = new Rectangle(625,441,20,20);
+			
+			}
+			
+
+
+			if(General.random(1,2) == 1) {
+				depositItemBox = new Rectangle(665,402,691,429);
+			}else {
+				depositItemBox = new Rectangle(625,441,20,20);
+			}
+		
+		}
+	
+	}
+	
+	public static Rectangle depositItemBox = new Rectangle(625,405,20,20);
+	
+	public static Rectangle quickDepositBox = new Rectangle(443,517,52,42);
+	
+	public static int[] possibleItemSlotsLeft = {6,14,22,30,38,46,54,62,70,78};
+	
+	public static int[] possibleItemSlotsRight = {7,15,23,31,39,47,55,63,71,79};
+	
+	
+	public static void reorganizeDoubleIngredients(String oney, int[] leftPlaces, String twoy, int[] rightPlaces) {
+		
+		if(!doubleItemInPlace(oney,leftPlaces)) {
+			organizeDoubleItem(oney,leftPlaces);
+		}
+	
+		if(!doubleItemInPlace(twoy,rightPlaces)) {
+			organizeDoubleItem(twoy,rightPlaces);
+		}
+	}
+	
+	public static void organizeDoubleItem(String name, int[] index) {
+	
+		RSItem[] the = Banking.find(name);
+		RSInterface yo = Interfaces.get(12,13);
+		if(the.length > 0) {
+			the[0].hover();
+			General.sleep(412,612);
+			Mouse.setSpeed(General.random(45, 60));
+			General.sleep(19,33);
+			Mouse.sendPress(Mouse.getPos(), 1);
+			General.sleep(412,612);
+			Mouse.moveBox(330,89,356,93);
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(14,38);
+					RSInterface hee = Interfaces.get(12,13,0);
+					RSInterface heet = Interfaces.get(12,13);
+					return hee != null && heet != null && heet.getAbsoluteBounds().contains(hee.getAbsoluteBounds());
+				}
+			}, General.random(6400,6900));
+			addLongWaitTime();
+			
+			int decidedInt = index[General.random(0,  index.length)];
+			RSInterface obj = Interfaces.get(12,13,decidedInt);
+			if(obj != null) {
+				Mouse.moveBox((int)obj.getAbsoluteBounds().getMinX() + 5, (int)obj.getAbsoluteBounds().getMinY() + 5,(int)obj.getAbsoluteBounds().getMaxX() - 5,(int)obj.getAbsoluteBounds().getMaxY() - 5);
+				General.sleep(412,612);
+				
+			}
+		
+			Mouse.sendRelease(Mouse.getPos(), 1);
+			addLongWaitTime();
+			addLongWaitTime();
+			General.sleep(412,612);
+		}
+	}
+	
+	public static void organizeInventoryItem(String name, int index) {
+		RSItem[] the = Inventory.find(name);
+		RSInterface yo = Interfaces.get(12,13);
+		if(the.length > 0) {
+			the[0].hover();
+			General.sleep(412,612);
+			Mouse.setSpeed(General.random(45, 60));
+			Mouse.sendPress(Mouse.getPos(), 1);
+			General.sleep(412,612);
+			if(index == 0) {
+				Mouse.moveBox(627,405,643,421);
+			}
+			if(index == 1) {
+				
+			}
+			if(index == 2) {
+				
+			}
+			addLongWaitTime();
+			addLongWaitTime();
+		
+			Mouse.sendRelease(Mouse.getPos(), 1);
+			addLongWaitTime();
+			addLongWaitTime();
+			General.sleep(412,612);
+		}
+	}
+	
+	public static boolean doubleItemInPlace(String name, int[] indexes) {
+		RSItem[] the = Banking.find(name);
+		if(the.length > 0) {
+			for(int i = 0; i < indexes.length; i++) {
+				if(the[0].getStack() > 0 && the[0].getIndex() == indexes[i]) {
+					return true;
+				}
+			}
+			
+		}
+		if(the.length == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static String lastSelectedSkill;
+	
+	private static void chooseSelectedSkill() {
+		if(General.random(1,2) == 1) {
+			if(lastSelectedSkill != null && lastSelectedSkill.contains(chosenSkillTwo)) {
+				selectedSkill = chosenSkillOne;
+			}else {
+				selectedSkill = chosenSkillTwo;
+			}
+		}else {
+			if(lastSelectedSkill != null && lastSelectedSkill.contains(chosenSkillOne)) {
+				selectedSkill = chosenSkillTwo;
+			}else {
+				selectedSkill = chosenSkillOne;
+			}
+		}
+		
+	}
+	
+	private static void resetAllToggles() {
+		
+		selectedSkill = "";
+		loadedSettings = false;
+		
+		readyToSellItems = false;
+		restockItems.clear();
+		itemsToSell.clear();
+		checkedForRestockItems = false;
+		doneSelling = false;
+		restockingItems = false;
+		itemQuantityRandomized = false;
+		
+		bankstandingLocation = "";
+		bankstandingTeleportItem = "";
+		bankingTile = new RSTile(General.random(2946, 2948),3367);
+		
+		currentSkillLevel = 1;
+		currentSkillTask = "";
+		trainingIngredientOne = "";
+		trainingIngredientTwo = "";
+		
+		readyToTrain = false;
+		freshTrainAttempt = false;
+		doneSkilling = false;
+		
+		
+		trainingStartTime = Timing.currentTimeMillis();
+		trainingSessionTotalTime = General.randomLong(3690000, 4560000);
+		currentTrainingTime = Timing.currentTimeMillis();
+		
+		xpFailsafeStartTime = Timing.currentTimeMillis();
+		xpFailsafeTotalTime = General.randomLong(900000, 1080000);
+		currentXpFailsafeTime = Timing.currentTimeMillis();
+		
+		baseXPValue = 0;
+		failsafeIteration = 0;
+	}
+	
+	
+	
+	public static long trainingSessionTotalTime = General.randomLong(3690000, 4560000);
+	
+	private static long xpFailsafeTotalTime = General.randomLong(900000, 1080000);
+	
+	public static long currentTrainingTime;
+	
+	public static long currentXpFailsafeTime;
+	
+	private static long xpFailsafeStartTime;
+	
+	public static long trainingStartTime;
+	
+	private static int baseXPValue = 0;
+	
+	private static int noStockItemCount = 0;
+	
+	public static void checkForSupplyQuantities(String skill) {
+		if(Banking.isBankScreenOpen()) {
+			if(!suppliesAreAvailable(skill)) {
+				noStockItemCount++;
+			}else {
+				noStockItemCount = 0;
+			}
+			if(noStockItemCount >= 2) {
+				General.sleep(817,1079);
+				if(Banking.isBankScreenOpen()) {
+					if(!suppliesAreAvailable(skill)) {
+						General.println("RAN OUT OF SUPPLIES" + selectedSkill + currentSkillTask);
+						doneSkilling = true;
+					}
+				}
+			}
+		}
+	}
+	
+	public static boolean suppliesAreAvailable(String type) {
+		if(type == "Fletching") {
+			if(currentSkillTask.contains("BeginningBows")) {
+				RSItem[] molten = Banking.find("Oak logs");
+				if(molten.length == 0) {
+					return false;
+				}
+				if(molten.length > 0 && molten[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsWillow")) {
+				RSItem[] molten = Banking.find("Willow logs");
+				if(molten.length == 0) {
+					return false;
+				}
+				if(molten.length > 0 && molten[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("MiddleBowsMaple")) {
+				RSItem[] molten = Banking.find("Maple logs");
+				if(molten.length == 0) {
+					return false;
+				}
+				if(molten.length > 0 && molten[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("FinalBows")) {
+				
+				RSItem[] item = Banking.find("Maple longbow (u)");
+				if(item.length == 0) {
+					return false;
+				}
+				if(item.length > 0 && item[0].getStack() <= 30) {
+					return false;
+				}
+				
+				RSItem[] itemm = Banking.find("Bow string");
+				if(itemm.length == 0) {
+					return false;
+				}
+				if(itemm.length > 0 && itemm[0].getStack() <= 30) {
+					return false;
+				}
+			}
+		}
+		
+		if(type == "Crafting") {
+			RSItem[] molten = Banking.find("Molten glass");
+			if(molten.length == 0) {
+				return false;
+			}
+			if(molten.length > 0 && molten[0].getStack() <= 30) {
+				return false;
+			}
+		}
+		
+		if(type == "Herblore") {
+			if(currentSkillTask.contains("RegularAttackPots")) {
+				
+				RSItem[] item = Banking.find("Guam potion (unf)");
+				if(item.length == 0) {
+					return false;
+				}
+				if(item.length > 0 && item[0].getStack() <= 30) {
+					return false;
+				}
+				
+				RSItem[] itemm = Banking.find("Eye of newt");
+				if(itemm.length == 0) {
+					return false;
+				}
+				if(itemm.length > 0 && itemm[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("RegularStrengthPots")) {
+				
+				RSItem[] item = Banking.find("Tarromin potion (unf)");
+				if(item.length == 0) {
+					return false;
+				}
+				if(item.length > 0 && item[0].getStack() <= 30) {
+					return false;
+				}
+				
+				RSItem[] itemm = Banking.find("Limpwurt root");
+				if(itemm.length == 0) {
+					return false;
+				}
+				if(itemm.length > 0 && itemm[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("SuperAttackPots")) {
+				
+				RSItem[] item = Banking.find("Irit potion (unf)");
+				if(item.length == 0) {
+					return false;
+				}
+				if(item.length > 0 && item[0].getStack() <= 30) {
+					return false;
+				}
+				
+				RSItem[] itemm = Banking.find("Unicorn horn dust");
+				if(itemm.length == 0) {
+					return false;
+				}
+				if(itemm.length > 0 && itemm[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			if(currentSkillTask.contains("AntifirePots")) {
+				
+				RSItem[] item = Banking.find("Lantadyme potion (unf)");
+				if(item.length == 0) {
+					return false;
+				}
+				if(item.length > 0 && item[0].getStack() <= 30) {
+					return false;
+				}
+				
+				RSItem[] itemm = Banking.find("Dragon scale dust");
+				if(itemm.length == 0) {
+					return false;
+				}
+				if(itemm.length > 0 && itemm[0].getStack() <= 30) {
+					return false;
+				}
+			}
+			
+		}
+		return true;
+	}
+	
+	private static void setStartingXPValue() {
+		if(selectedSkill.contains("Herblore")) {
+			baseXPValue = Skills.SKILLS.HERBLORE.getXP();
+		}
+		if(selectedSkill.contains("Crafting")) {
+			baseXPValue = Skills.SKILLS.CRAFTING.getXP();
+		}
+		if(selectedSkill.contains("Fletching")) {
+			baseXPValue = Skills.SKILLS.FLETCHING.getXP();
+		}
+		if(selectedSkill.contains("Cooking")) {
+			baseXPValue = Skills.SKILLS.COOKING.getXP();
+		}
+		if(selectedSkill.contains("Firemaking")) {
+			baseXPValue = Skills.SKILLS.FIREMAKING.getXP();
+		}
+		if(selectedSkill.contains("Combat")) {
+			baseXPValue = Skills.SKILLS.ATTACK.getXP() + Skills.SKILLS.DEFENCE.getXP() + Skills.SKILLS.STRENGTH.getXP() + Skills.SKILLS.HITPOINTS.getXP();
+		}
+	}
+	
+	public static String activeUsername;
+	public static String activePassword;
+	
+	 private static boolean atLoginScreen() {
+		 if(Interfaces.isInterfaceSubstantiated(378,78)) {
+			 return true;
+		 }
+		 if(Login.getLoginState() != Login.STATE.INGAME) {
+			 return true;
+		 }
+		 return false;
+	 }
+	 
+	 private static int loginBotCount = 0;
+	 
+	 private static void doLog(String activeUser, String activePass, String refresh) {
+			while(true) {
+				General.sleep(37,59);
+				if(!atLoginScreen() && !Interfaces.isInterfaceSubstantiated(378,78)) {
+					addLongWaitTime();
+					if(!atLoginScreen() && !Interfaces.isInterfaceSubstantiated(378,78)) {
+						break;
+					}
+				}
+				
+
+				if(Interfaces.isInterfaceSubstantiated(378,78)) {
+					addLongWaitTime();
+					addLongWaitTime();
+						if(Interfaces.isInterfaceSubstantiated(378,78)) {
+							if(Interfaces.get(378,78).click()) {
+								Timing.waitCondition(new Condition() {
+									@Override
+									public boolean active() {
+										General.sleep(19,87);
+										return !Interfaces.isInterfaceSubstantiated(378,78);
+									}
+								}, General.random(8800,9600));
+								addLongWaitTime();
+							}else {
+								addLongWaitTime();
+								General.sleep(315,612);
+								if(Interfaces.get(378,78).click()) {
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(19,87);
+											return !Interfaces.isInterfaceSubstantiated(378,78);
+										}
+									}, General.random(8800,9600));
+									addLongWaitTime();
+								}
+							}
+						}
+					
+				
+				}else {
+					
+					if(tooManyConnections()) {
+						resetProxy(refresh);
+					}
+					
+					if(activeUser != null && activePass != null) {
+					enterInformation(activeUser, activePass);
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,87);
+							return Interfaces.isInterfaceSubstantiated(378,78) && Login.getLoginMessage() != Login.LOGIN_MESSAGE.CONNECTING;
+						}
+					}, General.random(8800,9600));
+					}
+					General.sleep(315,612);
+				}
+				
+			}
+		}
+	 
+	 private static String holdRefreshURL;
+	 
+	 public static void resetProxy(String desURL) {
+		 	holdRefreshURL = desURL;
+	    	General.println("resetting..");
+	        General.sleep(32000 ,36000);
+	        currentXpFailsafeTime = Timing.currentTimeMillis();
+	        try {
+	            URL url = new URL(holdRefreshURL);
+	            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	            con.setUseCaches(false);
+	            con.setDoInput(true);
+	            con.setDoOutput(true);
+	            con.setRequestMethod("POST");
+	            StringBuilder sb = new StringBuilder();
+	            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+	            wr.writeBytes(sb.toString());
+	            wr.flush();
+	            wr.close();
+	            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+	            in.readLine();
+	            con.disconnect();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            
+	        }
+	    }
+	 
+	 private static boolean tooManyConnections() {
+			if(Login.getLoginMessage() == Login.LOGIN_MESSAGE.ERROR_CONNECTING) {
+				
+				return true;
+			}
+			if(Login.getLoginMessage() == Login.LOGIN_MESSAGE.TOO_MANY_ATTEMPTS) {
+				return true;
+			}
+			if(Login.getLoginMessage() == Login.LOGIN_MESSAGE.NOT_MEMBER) {
+				doneSkilling = true;
+				General.println("We aren't members");
+			}
+			if(Login.getLoginMessage() == Login.LOGIN_MESSAGE.MEM_WORLD) {
+				doneSkilling = true;
+				General.println("We aren't members");
+			}
+			if(Login.getLoginMessage() == Login.LOGIN_MESSAGE.BANNED) {
+				doneSkilling = true;
+				General.println("terminated lol");
+			}
+			return false;
+		}
+		
+	 
+	 private static void enterInformation(String curUser, String curPass) {
+			
+			Mouse.clickBox(380,310,387,319, 1);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Keyboard.pressKeys(KeyEvent.VK_ESCAPE);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Keyboard.pressKeys(KeyEvent.VK_ESCAPE);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Mouse.clickBox(399,292,476,300,1);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Mouse.clickBox(318,245,336,250,1);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Keyboard.typeString(curUser);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Mouse.clickBox(346,261,355,265,1);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Keyboard.typeString(curPass);
+			addLongWaitTime();
+			General.sleep(315,612);
+			if(Login.getLoginState() != Login.STATE.LOGINSCREEN) {
+				return;
+			}
+			Mouse.clickBox(353,325,370,336,1);
+			addLongWaitTime();
+			General.sleep(315,612);
+		}
+	
+	private static void handleLogins(String user, String pass, String urlrefresh) {
+		if(loginBotCount >= 8) {
+			loginBotCount = 0;
+			if (atLoginScreen()){
+				doLog(user,pass,urlrefresh);
+				General.sleep(37,59);
+			}
+			if(!correctZoom()) {
+				fixZoom();
+				General.sleep(317,617);
+			}
+
+			if(!Options.isResizableModeEnabled()) {
+				running = false;
+			}
+		}
+		
+		loginBotCount++;
+	}
+	
+	
+	
+	public static void withdrawIngredient(int quantity, String name) {
+		
+		
+		RSItem[] tele = Banking.find(name);
+		if(tele.length > 0 && tele[0].getStack() >= 28) {
+			Banking.withdraw(quantity, name);
+			PTrain.antibanSleep(86,179);
+		}
+	
+	
+	}
+	
+	
+	
+	public static void trainAcc(String curUsr, String curPass, String resetURL) {
+		
+		if(onStart()) {
+			chooseSelectedSkill();
+			setRandomBankLocation();
+			determineSkillTask(selectedSkill);
+			setStartingXPValue();
+			trainingSessionTotalTime = General.randomLong(1500000, 2100000);
+			
+			
+			
+			//restock items
+			handleTrainingRestock(curUsr,curPass,resetURL);
+			
+			
+			
+			xpFailsafeStartTime = Timing.currentTimeMillis();
+			//travel to skill place
+			while(true) {
+				handleLogins(curUsr,curPass,resetURL);
+				currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+				if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+					doneSkilling = true;
+					break;
+				}
+				if(atAreaForSkill() || doneSkilling) {
+					break;
+				}
+				
+				travelToSkillLocation(selectedSkill);
+				General.sleep(89,187);
+			}
+
+		
+		
+		//initial toggles go here
+		
+		if(selectedSkill.contains("Herblore")) {
+			setRandomItemClickingSpotsBankstanding("Herblore");
+			PHerblore.firstIngredientSpot = firstSpot;
+			PHerblore.secondIngredientSpot = secondSpot;
+			PHerblore.depositBox = depositItemBox;
+			PHerblore.firstBank = true;
+			PHerblore.bankingTile = bankingTile;
+		}
+		
+		
+		if(selectedSkill.contains("Crafting")) {
+			setRandomItemClickingSpotsBankstanding("Crafting");
+			
+			PCrafting.firstIngredientSpot = firstSpot;
+			PCrafting.secondIngredientSpot = secondSpot;
+			PCrafting.depositBox = depositItemBox;
+			PCrafting.firstBank = true;
+			PCrafting.bankingTile = bankingTile;
+		}
+		
+		
+		if(selectedSkill.contains("Fletching")) {
+			setRandomItemClickingSpotsBankstanding("Fletching");
+			PFletching.firstIngredientSpot = firstSpot;
+			PFletching.secondIngredientSpot = secondSpot;
+			PFletching.depositBox = depositItemBox;
+			PFletching.firstBank = true;
+			PFletching.bankingTile = bankingTile;
+		}
+		
+		
+		if(selectedSkill.contains("Cooking")) {
+			setRandomItemClickingSpotsBankstanding();
+			PCooking.firstIngredientSpot = firstSpot;
+			PCooking.secondIngredientSpot = secondSpot;
+			PCooking.depositBox = depositItemBox;
+			PCooking.firstBank = true;
+			PCooking.bankingTile = bankingTile;
+		}
+		
+		if(selectedSkill.contains("Firemaking")) {
+			setRandomItemClickingSpotsBankstanding();
+			PFiremaking.firstIngredientSpot = firstSpot;
+			PFiremaking.secondIngredientSpot = secondSpot;
+			PFiremaking.depositBox = depositItemBox;
+			PFiremaking.firstBank = true;
+			PFiremaking.bankingTile = bankingTile;
+		}
+		
+		if(selectedSkill.contains("Combat")) {
+			setRandomItemClickingSpotsBankstanding();
+			PCombat.firstBank = true;
+			PCombat.bankingTile = bankingTile;
+		}
+		
+		
+		trainingStartTime = Timing.currentTimeMillis();
+		xpFailsafeStartTime = Timing.currentTimeMillis();
+		//begin actual training
+		
+		while(true) {
+			
+			handleLogins(curUsr,curPass,resetURL);
+			updateBaseXPValueAndTime(selectedSkill);
+			
+			currentTrainingTime = Timing.currentTimeMillis() - trainingStartTime;
+			currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+			if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+				doneSkilling = true;
+				break;
+			}
+			if(doneSkilling) {
+				break;
+			}
+			
+			if(currentTrainingTime >= trainingSessionTotalTime) {
+				break;
+			}
+			
+			if(failsafeIteration >= failsafeIterationNumber) {
+				failsafeIterationNumber = General.random(240, 265);
+				failsafeIteration = 0;
+				failsafeChecks();
+			}
+			
+			
+			
+			if(selectedSkill.contains("Herblore")) {
+				
+				if(PHerblore.stopTraining) {
+					PHerblore.stopTraining = false;
+					doneSkilling = true;
+				}
+				
+				trainHerblore();
+			}
+			
+			
+			
+			if(selectedSkill.contains("Crafting")) {
+				
+				if(PCrafting.stopTraining) {
+					PCrafting.stopTraining = false;
+					doneSkilling = true;
+				}
+				
+				trainCrafting();
+			}
+			
+			
+			
+			if(selectedSkill.contains("Fletching")) {
+				
+				if(PFletching.stopTraining) {
+					PFletching.stopTraining = false;
+					doneSkilling = true;
+				}
+				
+				trainFletching();
+			}
+			
+			
+			if(selectedSkill.contains("Cooking")) {
+				if(PCooking.stopTraining) {
+					PCooking.stopTraining = false;
+					doneSkilling = true;
+				}
+				trainCooking();
+			}
+			
+			if(selectedSkill.contains("Firemaking")) {
+				if(PFiremaking.stopTraining) {
+					PFiremaking.stopTraining = false;
+					doneSkilling = true;
+				}
+				trainFiremaking();
+			}
+			
+			if(selectedSkill.contains("Combat")) {
+				if(PCombat.stopTraining) {
+					PCombat.stopTraining = false;
+					doneSkilling = true;
+				}
+				trainCombat();
+			}
+			
+			
+			
+			
+			failsafeIteration++;
+			General.sleep(19,33);
+		}
+		
+		xpFailsafeStartTime = Timing.currentTimeMillis();
+		//sell items
+		while(true) {
+			handleLogins(curUsr,curPass,resetURL);
+			currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+			if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+				doneSkilling = true;
+				break;
+			}
+			if(doneSkilling) {
+				break;
+			}
+			if(doneSelling) {
+				doneSelling = false;
+				break;
+			}
+			if(selectedSkill.contains("Herblore")) {
+				sellSkillingItems(herbloreItemsToSell,curUsr,curPass,resetURL);
+			}
+			
+			if(selectedSkill.contains("Crafting")) {
+				sellSkillingItems(craftingItemsToSell,curUsr,curPass,resetURL);
+			}
+			
+			if(selectedSkill.contains("Fletching")) {
+				sellSkillingItems(fletchingItemsToSell,curUsr,curPass,resetURL);
+			}
+			if(selectedSkill.contains("Cooking")) {
+				sellSkillingItems(cookingItemsToSell,curUsr,curPass,resetURL);
+			}
+			if(selectedSkill.contains("Firemaking")) {
+				sellSkillingItems(firemakingItemsToSell,curUsr,curPass,resetURL);
+			}
+			if(selectedSkill.contains("Combat")) {
+				sellSkillingItems(combatItemsToSell,curUsr,curPass,resetURL);
+			}
+			
+			
+			General.sleep(19,33);
+		}
+		if(doneSkilling) {
+			General.println("We failed a skilling attempt, screenshotting");
+			Screenshots.take(true);
+		}
+		doneSkilling = false;
+		
+		
+		returnToGrandExchange(curUsr,curPass,resetURL);
+		
+		resetAllToggles();
+		}
+	}
+	
+	public static void antibanSleep(int valueone, int valuetwo) {
+		if(General.random(1,500) == 1) {
+			Mouse.leaveGame(true);
+			General.sleep(19,1912);
+		}
+		if(General.random(1,500) == 1) {
+			Mouse.leaveGame(true);
+			General.sleep(4124,7122);
+		}
+		General.sleep(valueone,valuetwo);
+	
+	}
+	
+	private static void openNearbyBank() {
+		outsideBankCheckers();
+		Banking.openBank();
+		Timing.waitCondition(new Condition() {
+			@Override
+			public boolean active() {
+				General.sleep(19,33);
+				return Banking.isBankScreenOpen();
+			}
+		}, General.random(5434,6812));
+		if(Player.isMoving() && !Banking.isBankScreenOpen()) {
+			while(Player.isMoving()) {
+				General.sleep(217,412);
+			}
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(19,33);
+					return Banking.isBankScreenOpen();
+				}
+			}, General.random(2412,2912));
+		}
+		
+		
+	}
+	
+	private static int failCount = 0;
+	
+	private static void returnToGrandExchange(String curUsr,String curPass,String resetURL) {
+		while(true) {
+			handleLogins(curUsr,curPass,resetURL);
+			if(atArea(grandexchange)) {
+				break;
+			}
+			if(failCount >= 25) {
+				break;
+			}
+			if(!Banking.isBankScreenOpen() && (Inventory.getCount(ringOfWealthIDs) > 0 || Equipment.isEquipped(ringOfWealthIDs))){
+				teleportToGrandExchange();
+			}else {
+				if(Banking.isBankScreenOpen()) {
+					Banking.depositAll();
+					General.sleep(139,214);
+					Banking.depositEquipment();
+					General.sleep(139,214);
+					if(Game.getSetting(115) == 1) {
+
+						Mouse.clickBox(164,542,197,555,1);
+						General.sleep(1612,1912);
+					
+					}
+					Banking.withdraw(1, ringOfWealthIDs);
+					General.sleep(139,214);
+					Banking.close();
+					General.sleep(139,214);
+					General.sleep(139,214);
+					General.sleep(139,214);
+				}else {
+					walkRandomBlindwalk(Player.getPosition(), 1);
+					General.sleep(139,214);
+					Interfaces.closeAll();
+					General.sleep(139,214);
+					openNearbyBank();
+				}
+			}
+			
+			
+			
+			failCount++;
+		}
+		failCount = 0;
+	}
+	
+	private static int failsafeIterationNumber = General.random(240, 265);
+	private static int failsafeIteration = 0;
+	
+	private static int lastXPValue = 0;
+	
+	private static void updateBaseXPValueAndTime(String skill) {
+		if(skill.contains("Herblore")) {
+			lastXPValue = Skills.SKILLS.HERBLORE.getXP();
+			if(Skills.SKILLS.HERBLORE.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.HERBLORE.getXP();
+		}
+		if(skill.contains("Crafting")) {
+			lastXPValue = Skills.SKILLS.CRAFTING.getXP();
+			if(Skills.SKILLS.CRAFTING.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.CRAFTING.getXP();
+		}
+		if(skill.contains("Fletching")) {
+			lastXPValue = Skills.SKILLS.FLETCHING.getXP();
+			if(Skills.SKILLS.FLETCHING.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.FLETCHING.getXP();
+		}
+		if(skill.contains("Cooking")) {
+			lastXPValue = Skills.SKILLS.COOKING.getXP();
+			if(Skills.SKILLS.COOKING.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.COOKING.getXP();
+		}
+		if(skill.contains("Firemaking")) {
+			lastXPValue = Skills.SKILLS.FIREMAKING.getXP();
+			if(Skills.SKILLS.FIREMAKING.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.FIREMAKING.getXP();
+		}
+		
+		if(skill.contains("Combat")) {
+			lastXPValue = Skills.SKILLS.HITPOINTS.getXP();
+			if(Skills.SKILLS.HITPOINTS.getXP() > lastXPValue) {
+				currentXpFailsafeTime = Timing.currentTimeMillis();
+			}
+			lastXPValue = Skills.SKILLS.HITPOINTS.getXP();
+		}
+	}
+	
+	private static boolean doneSkilling;
+	
+	private static String[] herbloreItemsToSell = {"Guam potion (unf)", "Eye of newt", 
+			"Tarromin potion (unf)", "Limpwurt root", "Irit potion (unf)", "Unicorn horn dust", 
+			"Lantadyme potion (unf)", "Dragon scale dust", "Strength potion(3)", "Attack potion(3)", 
+			"Antifire potion(3)", "Super attack potion(3)"};
+	
+	private static ArrayList<String> itemsToSell = new ArrayList<String>();
+	
+	private static boolean noMoreSellableItems(String[] theList) {
+		int beet = theList.length;
+		int ticker = 0;
+		for(int i = 0; i < theList.length; i++) {
+			RSItem[] hello = Banking.find(theList[i]);
+			if(hello.length == 0) {
+				ticker++;
+			}
+		}
+		if(ticker == beet) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static boolean readyToSellItems;
+	
+	private static boolean doneSelling;
+	
+	private static long failsafetimerMaxDuration;
+	
+	private static long failsafetimerCurrentTime;
+	
+	private static long failsafetimerStartTime;
+	
+	
+	
+	private static void sellSkillingItems(String[] listOfItems, String curUsr, String curPass, String resetURL) {
+
+		if(atArea(grandexchange)) {
+			for(int i = 0; i < listOfItems.length; i++) {
+				handleLogins(curUsr,curPass,resetURL);
+				currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+				if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+					doneSkilling = true;
+					break;
+				}
+				while(Inventory.getCount(listOfItems[i]) > 0) {
+					handleLogins(curUsr,curPass,resetURL);
+					currentXpFailsafeTime = Timing.currentTimeMillis() - xpFailsafeStartTime;
+					if(currentXpFailsafeTime >= xpFailsafeTotalTime) {
+						doneSkilling = true;
+						break;
+					}
+					PrivateExchangeBuyerResize.sellGEItem(listOfItems[i], 0);
+					General.sleep(19,33);
+				}
+				
+			}
+			
+			if(Inventory.getCount(listOfItems) == 0) {
+				doneSelling = true;
+			}
+		}else {
+			if(readyToSellItems && !Banking.isBankScreenOpen()) {
+				teleportToGrandExchange();
+			}else {
+				if(Banking.isBankScreenOpen()) {
+					if(Game.getSetting(115) == 1) {
+
+						Mouse.clickBox(164,542,197,555,1);
+						General.sleep(1612,1912);
+					
+					}
+					
+					Banking.depositAll();
+					General.sleep(69,139);
+					Banking.depositEquipment();
+					General.sleep(69,139);
+					Banking.withdraw(0, "Coins");
+					General.sleep(69,139);
+					
+					
+					
+					RSItem[] usedRings = Banking.find(usedRingOfWealthIDs);
+					if(usedRings.length > 0) {
+						Banking.withdraw(1, usedRingOfWealthIDs);
+						General.sleep(69,126);
+					}else {
+						Banking.withdraw(1, "Ring of wealth (5)");
+						General.sleep(69,126);
+					}
+					
+					
+					if(Game.getSetting(115) != 1) {
+						Mouse.clickBox(216,542,245,554,1);
+						General.sleep(69,139);
+						General.sleep(69,139);
+						General.sleep(69,139);
+					}
+					
+					itemsToSell.clear();
+					for(int i = 0; i < listOfItems.length; i++) {
+						itemsToSell.add(listOfItems[i]);
+					}
+					Collections.shuffle(itemsToSell);
+					for(int b = 0; b < itemsToSell.size(); b++) {
+						Banking.withdraw(0, itemsToSell.get(b));
+						General.sleep(69,139);
+					}
+					
+					Mouse.clickBox(164,542,197,555,1);
+					General.sleep(69,139);
+					
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(19,33);
+							return noMoreSellableItems(listOfItems);
+						}
+					}, General.random(2734,3412));
+					
+					itemsToSell.clear();
+					
+					if(noMoreSellableItems(listOfItems)) {
+						Banking.close();
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(19,33);
+								return !Banking.isBankScreenOpen();
+							}
+						}, General.random(2434,2812));
+						readyToSellItems = true;
+					}
+					
+				}else {
+					openNearbyBank();
+				}
+			}
+			
+		}
+	
+	}
+
+	
+	private static int randomInvItemNumber;
+	
+	private static void clickRandomInventoryItem(){
+		RSItem[] a = Inventory.getAll();
+		randomInvItemNumber = General.random(0, a.length - 1);
+		if(a.length > 0 && a[randomInvItemNumber] != null){
+			a[randomInvItemNumber].click();
+			General.sleep(19,33);
+		}
+	}
+	
+	private static void hoverMinimap() {
+		Mouse.moveBox(267,112,571,393);
+	}
+	
+	private static void teleportToGrandExchange() {
+
+		RSItem[] lumb = Inventory.find(ringOfWealthIDs);
+		RSItem[] lumbb = Equipment.find(ringOfWealthIDs);
+		
+		if(Game.getUptext() != null && Game.getUptext().contains("->")){
+			clickRandomInventoryItem();
+			General.sleep(89,169);
+			General.sleep(89,169);
+		}
+		
+		if(lumbb.length > 0){
+			if(lumbb[0].click("Grand Exchange")) {
+
+				if(General.random(1,24) != 1) {
+					General.sleep(89,169);
+					General.sleep(89,169);
+					hoverMinimap();
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(14,21);
+							return atArea(grandexchange);
+						}
+					}, General.random(4500,5300));
+					addLongWaitTime();
+				}else {
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(14,21);
+							return atArea(grandexchange);
+						}
+					}, General.random(4500,5300));
+					General.sleep(89,169);
+					General.sleep(89,169);
+					General.sleep(89,169);
+				}
+			
+			}
+		}else {
+			if(lumb.length > 0){
+				if(lumb[0].click("Rub")) {
+					General.sleep(89,169);
+					Mouse.moveBox(53,543,525,704);
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,38);
+							RSInterface hey = Interfaces.get(219,1,2);
+							return hey != null;
+						}
+					}, General.random(2300,3500));
+					General.sleep(89,169);
+					RSInterface hi = Interfaces.get(219,1,2);
+					if(hi != null) {
+						
+						hi.click();
+								if(General.random(1,24) != 1) {
+									General.sleep(89,169);
+									
+									hoverMinimap();
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(14,21);
+											return atArea(grandexchange);
+										}
+									}, General.random(4500,5300));
+								
+									addLongWaitTime();
+								}else {
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(14,21);
+											return atArea(grandexchange);
+										}
+									}, General.random(4500,5300));
+									General.sleep(89,169);
+									General.sleep(89,169);
+									General.sleep(89,169);
+								}
+					}
+				
+				}
+			}
+		}
+		
+		
+		
+	
+	}
+	
+
+	@Override
+	public void run() {
+		if(onStart()) {
+			General.sleep(500,1000);	
+		}
+			
+	}
+	
+}
