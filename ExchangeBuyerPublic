@@ -1,0 +1,2066 @@
+package scripts;
+
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.tribot.api.General;
+import org.tribot.api.Timing;
+import org.tribot.api.input.Keyboard;
+import org.tribot.api.input.Mouse;
+import org.tribot.api.types.generic.Condition;
+import org.tribot.api2007.Banking;
+import org.tribot.api2007.Camera;
+import org.tribot.api2007.ChooseOption;
+import org.tribot.api2007.Game;
+import org.tribot.api2007.Interfaces;
+import org.tribot.api2007.Inventory;
+import org.tribot.api2007.NPCChat;
+import org.tribot.api2007.NPCs;
+import org.tribot.api2007.Objects;
+import org.tribot.api2007.Options;
+import org.tribot.api2007.Player;
+import org.tribot.api2007.Skills;
+import org.tribot.api2007.Walking;
+import org.tribot.api2007.WorldHopper;
+import org.tribot.api2007.types.RSArea;
+import org.tribot.api2007.types.RSGEOffer;
+import org.tribot.api2007.types.RSInterface;
+import org.tribot.api2007.types.RSItem;
+import org.tribot.api2007.types.RSNPC;
+import org.tribot.api2007.types.RSObject;
+import org.tribot.api2007.types.RSServer;
+import org.tribot.api2007.types.RSTile;
+import org.tribot.script.Script;
+import org.tribot.api2007.GrandExchange;
+import org.tribot.script.ScriptManifest;
+import org.tribot.script.interfaces.MessageListening07;
+public class ExchangeBuyerPublic extends Script implements MessageListening07 {
+	
+private static boolean failsafeApple;
+
+
+	private static void sleepGeneralReactionTime() {
+	if(General.random(1,950) == 1) {
+		Mouse.leaveGame(true);
+		General.sleep(10234,16231);
+	}else {
+		if(General.random(1,650) == 1) {
+			Mouse.leaveGame(true);
+			General.sleep(1601,6162);
+		}
+	}
+	
+	if(General.random(1,2) == 1) {
+		int randValue = General.random(1,10);
+		if(randValue > 9) {
+			if(General.random(1,3) == 1) {
+				General.sleep(524, 1218);
+			}else {
+				General.sleep(524, 988);
+			}
+			
+		}else {
+			if(randValue > 8) {
+				if(General.random(1,3) == 1) {
+					General.sleep(524,955);
+				}else {
+					General.sleep(524,855);
+				}
+				
+			}else {
+				if(randValue > 7) {
+					General.sleep(531,755);
+				}else {
+					if(randValue > 6) {
+						General.sleep(534,723);
+					}else {
+						if(randValue > 5) {
+							General.sleep(536,693);
+						}else {
+							if(randValue > 4) {
+								General.sleep(537,673);
+							}else {
+								if(randValue > 3) {
+									General.sleep(538,653);
+								}else {
+									if(randValue > 2) {
+										General.sleep(539,633);
+									}else {
+										if(randValue > 1) {
+											General.sleep(540,613);
+										}else {
+											if(randValue == 1) {
+												General.sleep(541,583);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}else {
+
+		int randValue = General.random(1,10);
+		if(randValue > 9) {
+			if(General.random(1,3) == 1) {
+				General.sleep(510, 1218);
+			}else {
+				General.sleep(505, 988);
+			}
+			
+		}else {
+			if(randValue > 8) {
+				if(General.random(1,3) == 1) {
+					General.sleep(510,955);
+				}else {
+					General.sleep(510,855);
+				}
+				
+			}else {
+				if(randValue > 7) {
+					General.sleep(510,755);
+				}else {
+					if(randValue > 6) {
+						General.sleep(510,723);
+					}else {
+						if(randValue > 5) {
+							General.sleep(515,693);
+						}else {
+							if(randValue > 4) {
+								General.sleep(520,673);
+							}else {
+								if(randValue > 3) {
+									General.sleep(525,653);
+								}else {
+									if(randValue > 2) {
+										General.sleep(530,633);
+									}else {
+										if(randValue > 1) {
+											General.sleep(535,613);
+										}else {
+											if(randValue == 1) {
+												General.sleep(541,583);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+}
+	
+	
+	
+	
+	
+	static int worldSelection = 0;
+	
+
+	private static boolean randomize()
+	{
+		if(General.random(1,7) == 1) {
+			return true;
+		}
+		return false;
+	}
+
+	public static int getPopulation(int world){
+
+
+		if(world<300) {
+			world+=300;
+		}
+		List<RSServer> servers = WorldHopper.getServers();
+		for(RSServer s: servers){
+			if(s.getNumber()==world) {
+				return s.getPopulation();
+			}
+		}
+		
+		List<RSServer> a = WorldHopper.getServers();
+		
+		if(a.size() > 0) {
+			if(a.get(0) == null) {
+				WorldHopper.openWorldSelect();
+			}
+		}else {
+			WorldHopper.openWorldSelect();
+		}
+
+		General.println("Failed to get population");
+		return 0;
+	
+	
+	}
+	
+
+	private static void walkRandomBlindwalk(RSTile a, int randomize){
+		RSTile b;
+		if(randomize()){
+			b = new RSTile(a.getX() + General.random(1, 2), a.getY() - General.random(1, 2));
+		}else{
+			b = new RSTile(a.getX() - General.random(1, 2), a.getY() + General.random(1, 2));
+		}
+
+		Walking.walkPath(Walking.randomizePath(Walking.generateStraightPath(b), randomize, randomize));
+	}
+	
+	public static void closeGE(){
+		GrandExchange.close();
+		sleepGeneralReactionTime();
+	}
+	
+	private static RSNPC getExchange(){
+		RSNPC[] hi = NPCs.findNearest("Grand Exchange Clerk");
+		if(hi.length > 0){
+			if(randomize()){
+				if(hi.length >= 1){
+					return hi[1];
+				}else {
+					return hi[0];
+				}
+			}else{
+				return hi[0];
+			}
+		}
+		return null;
+	}
+
+	private static RSNPC getExchangeBanker(){
+
+		RSNPC[] hi = NPCs.findNearest("Banker");
+		if(hi.length > 0){
+			for(int i = 0; i < hi.length; i++) {
+				if(hi[i] != null) {
+					if(grandexchange.contains(hi[i].getPosition())) {
+						return hi[i];
+					}
+				}
+			}
+		}
+		return null;
+	
+	}
+
+
+	
+	private static boolean didIt;
+	
+	public static void clickExchangeBank(){
+		if(geOpen()) {
+			walkRandomBlindwalk(Player.getPosition(), 0);
+			sleepGeneralReactionTime();
+		}
+		RSNPC chest = getExchangeBanker();
+		if(chest != null){
+			if(chest.isClickable()){
+				chest.click("Bank Banker");
+				if(randomize()){
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							return Banking.isBankScreenOpen();
+						}
+					}, General.random(19,39));
+				}else{
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							return Banking.isBankScreenOpen();
+						}
+					}, General.random(15,8912));
+				}
+			}else{
+				walkRandomBlindwalk(chest.getPosition(), 1);
+				sleepGeneralReactionTime();
+			}	
+		}else {
+			walkRandomBlindwalk(new RSTile(3162,3488), 1);
+			sleepGeneralReactionTime();
+		}
+	}
+	
+	private static boolean walkPathOne = false;
+	private static boolean walkPathTwo = false;
+
+	private static void setWalkPathVersion(){
+		if(randomize()){
+			walkPathOne = true;
+			walkPathTwo = false;
+		}else{
+			walkPathTwo = true;
+			walkPathOne = false;
+		}
+	}
+
+	
+	private static void clickBuyGE(int index) {
+		if(index == 0) {
+			Mouse.clickBox(41,133,70,164,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 1) {
+			Mouse.clickBox(154,136,187,164,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 2) {
+			Mouse.clickBox(274,131,308,166,1);
+			sleepGeneralReactionTime();
+		}
+	}
+	
+	private static boolean atOfferScreen() {
+		RSInterface oh =  Interfaces.get(465,6,2);
+		return oh != null && !oh.isHidden() && oh.getText().contains("Select an offer");
+	}
+	
+	private static RSGEOffer getCompletedOffers() {
+		RSGEOffer[] hi = GrandExchange.getOffers();
+		if(hi.length > 0) {
+			for(int i = 0; i < hi.length; i++) {
+				if(hi[i] != null && hi[i].getStatus() == RSGEOffer.STATUS.COMPLETED) {
+					return hi[i];
+				}
+			}
+		}
+		return null;
+	}
+	
+	private static void handleOfferScreen(String trigger) {
+		if(collectItemsAvailable() && collectItemsAvailable()) {
+			int prev = Inventory.getAll().length;
+			clickCollectItemBox();
+
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,39);
+					return !collectItemsAvailable();
+				}
+			}, General.random(2900,3912));
+		
+			sleepGeneralReactionTime();
+			
+		}else {
+				RSGEOffer[] hey = GrandExchange.getOffers();
+				if(hey.length > 0) {
+					clickBuyGE(General.random(0, 2));
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							RSInterface oo = Interfaces.get(162,42);
+							return oo != null && !oo.isHidden() && oo.getText().contains("What would you");
+						}
+					}, General.random(3900,4912));
+					sleepGeneralReactionTime();
+				}
+		
+		}
+		
+	
+	}
+	
+	private static RSGEOffer holdOffers;
+	
+	public static boolean geOpen() {
+		return Interfaces.get(465) != null && !Interfaces.get(465).isHidden() && !Banking.isBankScreenOpen();
+	}
+	
+	private static int coins;
+	
+	private static void tickDownSellPrice() {
+		Mouse.clickBox(293,201,321,218,1);
+	}
+	
+	public static void sellGeItem(String name) {
+		
+		//rework this method
+		if(geOpen()) {
+			RSGEOffer compe = completedOffer(name);
+			if(compe != null) {
+				RSItem[] coi = Inventory.find(995);
+				if(coi.length > 0) {
+				coins = coi[0].getStack();
+				}
+				clickCollectItemBox();
+				sleepGeneralReactionTime();
+			}else {
+				if(atOfferScreen()) {
+					RSGEOffer comp = completedOffer(name);
+					if(comp != null) {
+						RSItem[] coi = Inventory.find(995);
+						if(coi.length > 0) {
+						coins = coi[0].getStack();
+						}
+						clickCollectItemBox();
+						sleepGeneralReactionTime();
+					}else {
+						shuffNums();
+						Collections.shuffle(slots);
+						for(int i = 0; i < 8; i++) {
+							RSGEOffer[] hey = GrandExchange.getOffers();
+							if(hey.length > 0){
+							if(hey[slots.get(i)] != null) {
+								if(hey[slots.get(i)].getItemName() == null) {
+									
+									clickSellGE(slots.get(i));
+									sleepGeneralReactionTime();
+									break;
+								}
+							}
+						}
+						General.sleep(19,102);	
+					}
+					
+					}
+					
+				}else {
+					RSGEOffer yo = GrandExchange.getCurrentOffer();
+					if(yo != null) {
+						RSInterface oo = Interfaces.get(465,24,18);
+						if(oo != null && !oo.isHidden() && oo.getText().contains("Sell offer")) {
+						
+								if(GrandExchange.getPrice() > 3) {
+									int origItemPrice = GrandExchange.getGuidePrice();
+									int failsafeCheck = GrandExchange.getGuidePrice() - (int)(GrandExchange.getGuidePrice() * 0.12);
+									int clickNum;
+									if(randomize()) {
+										clickNum = 3;
+									}else {
+										clickNum = 4;
+									}
+									
+									if(GrandExchange.getPrice() > failsafeCheck) {
+										if(randomize()) {
+											for(int i = 0; i < 3 + 1; i++) {
+									
+												tickDownSellPrice();
+												sleepGeneralReactionTime();
+												
+											}
+										}else {
+											for(int i = 0; i < 3; i++) {
+										
+												tickDownSellPrice();
+												sleepGeneralReactionTime();
+												
+											}
+										}
+									}
+									clickConfirmGEOffer();
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,31);
+												RSInterface ooo = Interfaces.get(465,25);
+												return ooo != null && !ooo.isHidden() && ooo.getText().contains("Choose an");
+											}
+										}, General.random(2600,2900));
+										sleepGeneralReactionTime();
+									
+								}else {
+									RSItem[] bee = Inventory.find(name);
+									if(bee.length > 0) {
+										bee[0].click();
+
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,31);
+												return GrandExchange.getPrice() > 3;
+											}
+										}, General.random(2900,3912));
+									
+										sleepGeneralReactionTime();
+									}
+									
+								
+								}
+							
+						}else {
+							
+							walkRandomBlindwalk(Player.getPosition(), 1);sleepGeneralReactionTime();
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									return GrandExchange.getWindowState().equals(GrandExchange.WINDOW_STATE.NEW_OFFER_WINDOW);
+								}
+							}, General.random(2900,3912));
+						
+							sleepGeneralReactionTime();
+						}
+					}
+				
+				}
+			}
+			
+			
+			
+		}else {
+			openExchange();
+		}
+
+	}
+	
+	private static RSGEOffer getAllCompletedOffers() {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0) {
+			for(int i = 0; i < hey.length; i++) {
+				RSGEOffer[] be = GrandExchange.getOffers();
+				if(be[i] != null) {
+				
+						if(be[i].getStatus() == RSGEOffer.STATUS.COMPLETED || be[i].getStatus() == RSGEOffer.STATUS.CANCELLED) {
+							return be[i];
+						}
+				
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static boolean collectItemsAvailable() {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0 && GrandExchange.getWindowState() != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+			for(int i = 0; i < hey.length; i++) {
+				if(hey[i].getStatus().equals(RSGEOffer.STATUS.COMPLETED)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static void sellGEItemPotionsQuant(String name, int quant) {
+		if(geOpen()) {
+			if(collectItemsAvailable()) {
+				if(GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+					if(collectItemsAvailable()) {
+						clickCollectItemBox();
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,39);
+									return !collectItemsAvailable();
+								}
+							}, General.random(3100,3900));
+							sleepGeneralReactionTime();
+					}
+				}else {
+					Walking.walkTo(Player.getPosition());
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+				}
+			}else {
+				
+				RSItem[] bee = Inventory.find(name);
+				if(bee.length > 0) {
+					bee[0].click();
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							return GrandExchange.getItemName() != null && GrandExchange.getItemName().contains(name);
+						}
+					}, General.random(3100,3900));
+					sleepGeneralReactionTime();
+					if(!GrandExchange.getItemName().contains(name)) {
+						if(bee.length > 0) {
+							bee[0].click();
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,39);
+									return GrandExchange.getItemName() != null && GrandExchange.getItemName().contains(name);
+								}
+							}, General.random(3100,3900));
+							sleepGeneralReactionTime();
+						}
+					}
+				}
+				
+				
+				if(GrandExchange.getPrice() >= GrandExchange.getGuidePrice()) {
+					if(GrandExchange.getPrice() > GrandExchange.getGuidePrice()) {
+						clickResetPrice();
+						sleepGeneralReactionTime();
+					}
+					for(int i = 0; i < General.random(2, 3); i++) {
+						tickDownSellPrice();
+						sleepGeneralReactionTime();
+					}
+				}
+				
+				setQuantSell(name, quant);
+				
+				General.println("stringquant" + quant + "getPrice" + GrandExchange.getPrice() + "guideprice" + GrandExchange.getGuidePrice() + "quant" + GrandExchange.getQuantity());
+				int currPrice = GrandExchange.getPrice();
+				int guidePrice = GrandExchange.getGuidePrice();
+				if(currPrice < guidePrice && GrandExchange.getQuantity() == quant) {
+					General.println("Allset");
+					clickConfirmGEOffer();
+					
+					sleepGeneralReactionTime();
+					if(General.random(1,12) != 1) {
+						Mouse.moveBox(423,52,516,95);
+					}
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+						}
+					}, General.random(3800,4900));
+					sleepGeneralReactionTime();
+					if(geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,39);
+								return collectItemsAvailable();
+							}
+						}, General.random(3800,4900));
+						sleepGeneralReactionTime();
+						//hover the box
+						if(collectItemsAvailable()) {
+							clickCollectItemBox();
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,39);
+									return !collectItemsAvailable();
+								}
+							}, General.random(3800,4900));
+							sleepGeneralReactionTime();
+						}
+					}
+				
+				}
+				
+				
+			}
+				
+		}else {
+			openExchange();
+		}
+
+	
+	
+	}
+
+	private static void clickConfirmGEOffer() {
+		Mouse.clickBox(192,275,328,301,1);
+		
+	}
+	
+	public static void sellGEItemPotions(String name) {
+		
+
+		
+		if(geOpen()) {
+			/*
+				if(Interfaces.get(465,22,1) != null && 
+						Interfaces.get(465,22,1).getText() != null && 
+						Interfaces.get(465,22,1).getText().contains("a total of")) {
+					walkRandomBlindwalk(Player.getPosition(), 1);sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+				}
+				*/
+			
+			
+			
+
+				RSItem[] bee = Inventory.find(name);
+				if(bee.length > 0) {
+					bee[0].click();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+				}
+				
+//set value
+				if(GrandExchange.getPrice() >= GrandExchange.getGuidePrice()) {
+					tickDownSellPrice();
+					sleepGeneralReactionTime();
+				}
+				
+				
+				
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(21,31);
+						return GrandExchange.getPrice() < GrandExchange.getGuidePrice();
+					}
+				}, General.random(3100,3900));
+				if(GrandExchange.getPrice() < GrandExchange.getGuidePrice()) {
+					clickConfirmGEOffer();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+					clickCollectItemBox();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+					sleepGeneralReactionTime();
+				}
+				
+				
+				
+					
+			
+		}else {
+			openExchange();
+		}
+
+	
+	
+	}
+	
+private static ArrayList<Integer> slots = new ArrayList<Integer>();
+	
+	private static void shuffNums() {
+		for(int i = 1; i < 8; i++) {
+			slots.add(i);
+		}
+	}
+	
+	private static void clickSellGE(int index) {
+		if(index == 0) {
+			Mouse.clickBox(109,128,143,163,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 1) {
+			Mouse.clickBox(225,127,262,165,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 2) {
+			Mouse.clickBox(342,129,380,166,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 3) {
+			Mouse.clickBox(456,127,496,166,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 4) {
+			Mouse.clickBox(109,245,143,284,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 5) {
+			Mouse.clickBox(225,248,261,285,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 6) {
+			Mouse.clickBox(343,249,377,285,1);
+			sleepGeneralReactionTime();
+		}
+		if(index == 7) {
+			Mouse.clickBox(458,246,496,285,1);
+			sleepGeneralReactionTime();
+		}
+	}
+	
+	
+	private static void confirmExchangeOffer(String trigger) {
+
+		clickConfirmGEOffer();
+		if(randomize()){
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,31);
+					return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+				}
+			}, General.random(2600,2900));
+		}else{
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,31);
+					return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+				}
+			}, General.random(3100,4112));
+		}
+		sleepGeneralReactionTime();
+		if(Interfaces.get(465,6,2) != null && !Interfaces.get(465,6,2).isHidden()) {
+			RSGEOffer[] hey = GrandExchange.getOffers();
+			if(hey.length > 0) {
+				for(int i = 0; i < hey.length; i++) {
+					if(hey[i].getItemName() != null && hey[i].getItemName().contains(trigger)) {
+						if(randomize()){
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSGEOffer ohlol = completedOffer(trigger);
+									return ohlol != null;
+								}
+							}, General.random(2900,2900));
+						}else{
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSGEOffer ohlol = completedOffer(trigger);
+									return ohlol != null;
+								}
+							}, General.random(3100,4112));
+						}
+						sleepGeneralReactionTime();
+					}
+					General.sleep(19,33);
+				}
+			}
+		}
+	
+	
+	}
+	
+	private static RSGEOffer bolts(String name) {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0) {
+			for(int i = 0; i < hey.length; i++) {
+				RSGEOffer[] be = GrandExchange.getOffers();
+				if(be[i] != null && be[i].getItemName() != null) {
+					if(be[i].getItemName().contains("Sapphire bolts")) {
+						if(be[i].getStatus() == RSGEOffer.STATUS.IN_PROGRESS && Inventory.getCount("Sapphire bolts") == 0) {
+							return be[i];
+						}
+				}
+				}
+			}
+		}
+		return null;
+	}
+	
+
+	private static RSGEOffer completedOffer(String name) {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0) {
+			for(int i = 0; i < hey.length; i++) {
+				RSGEOffer[] be = GrandExchange.getOffers();
+				if(be[i] != null && be[i].getItemName() != null) {
+					if(be[i].getItemName().contains(name)) {
+						if(be[i].getStatus() == RSGEOffer.STATUS.COMPLETED) {
+							return be[i];
+						}
+				}
+				}
+			}
+		}
+		return null;
+	}
+	
+
+	private static void setTheQuant(String name, int quantity) {
+		if(name.contains("schoo")) {
+			sleepGeneralReactionTime();
+		}else{
+			if(quantity != 1) {
+				Mouse.clickBox(221,203,243,218,1);
+				Timing.waitCondition(new Condition() {
+					@Override
+					public boolean active() {
+						General.sleep(21,39);
+						RSInterface oo = Interfaces.get(162,41);
+						return oo != null && !oo.isHidden() && oo.getText().contains("How many");
+					}
+				}, General.random(3900,4912));
+				sleepGeneralReactionTime();
+				RSInterface weet = Interfaces.get(162,41);
+				if(weet != null && !weet.isHidden() && weet.getText().contains("How many")) {
+					Keyboard.typeSend(Integer.toString(quantity));
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,39);
+							RSInterface oo = Interfaces.get(162,41);
+							return  GrandExchange.getQuantity() == quantity;
+						}
+					}, General.random(3900,4912));
+					sleepGeneralReactionTime();
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	private static void setQuantSell(String name, int quantity) {
+		setCustomSellValue();
+		Timing.waitCondition(new Condition() {
+			@Override
+			public boolean active() {
+				General.sleep(21,39);
+				RSInterface oo = Interfaces.get(162,41);
+				return oo != null && !oo.isHidden() && oo.getText().contains("How many");
+			}
+		}, General.random(3900,4912));
+		sleepGeneralReactionTime();
+		RSInterface oo = Interfaces.get(162,41);
+		if(oo != null && !oo.isHidden() && oo.getText().contains("How many")) {
+			Keyboard.typeSend(Integer.toString(quantity));
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,39);
+					RSInterface oo = Interfaces.get(162,41);
+					return GrandExchange.getQuantity() == quantity;
+				}
+			}, General.random(3900,4912));
+			sleepGeneralReactionTime();
+		}
+	}
+	
+	private static void setQuantityBuy() {
+		Mouse.clickBox(221,203,243,218,1);
+	}
+	
+	private static void setTheQuantTele(int quantity, String name) {
+		if(name.contains("schoo")) {
+			sleepGeneralReactionTime();
+		}else {
+			if(name.contains("teleport")) {
+				setQuantityBuy();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				Keyboard.typeSend(Integer.toString(General.random(50,70)));
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+			}else {
+				
+				setQuantityBuy();
+				
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				Keyboard.typeSend(Integer.toString(quantity));
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+			}
+		}
+		
+		
+	}
+	
+	private static void setCustomSellValue() {
+		Mouse.clickBox(237,202,262,219,1);
+		
+	}
+	
+	private static void tickUpPricePercent(String name, int addition) {
+		if(GrandExchange.getPrice() != GrandExchange.getGuidePrice()) {
+			clickResetPrice();
+			sleepGeneralReactionTime();
+		}
+		Mouse.clickBox(378,204,403,220,1);
+		Timing.waitCondition(new Condition() {
+			@Override
+			public boolean active() {
+				General.sleep(21,39);
+				RSInterface oo = Interfaces.get(162,41);
+				return oo != null && !oo.isHidden() && oo.getText().contains("Set");
+			}
+		}, General.random(3900,4912));
+		sleepGeneralReactionTime();
+		RSInterface ooe = Interfaces.get(162,41);
+		if(ooe != null && !ooe.isHidden() && ooe.getText().contains("Set")){
+			Keyboard.typeSend(Integer.toString(GrandExchange.getGuidePrice() + addition));
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,39);
+					RSInterface oo = Interfaces.get(162,41);
+					return  GrandExchange.getQuantity() > GrandExchange.getGuidePrice();
+				}
+			}, General.random(3900,4912));
+		}
+		
+		sleepGeneralReactionTime();
+	}
+	
+		private static void tickUpPriceTicker(String name) {
+
+			if(GrandExchange.getPrice() != GrandExchange.getGuidePrice()) {
+				clickResetPrice();
+				sleepGeneralReactionTime();
+			}
+			for(int i = 0; i < General.random(5, 6); i++) {
+				if(Game.getUptext() != null && Game.getUptext().contains("+5")){
+					Mouse.click(1);
+					
+				}else {
+					Mouse.clickBox(437,205,456,219,1);
+				}
+				
+				General.sleep(217,317);
+			}
+		
+	}
+	
+	private static boolean prevItem() {
+		RSInterface e = Interfaces.get(162,50,4);
+		if(e != null) {
+			if(e.getText() != null && e.getText().contains("Start typing") && !e.isHidden()) {
+				return true;
+			}
+		}
+		RSInterface the = Interfaces.get(162,50,0);
+		if(the != null) {
+			if(the.getText() != null && the.getText().contains("Start typing") && !the.isHidden()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static void clickSearchBox() {
+		Mouse.clickBox(95,94,128,122,1);
+	}
+	
+	private static int scrollGeCount = 0;
+	
+	private static void inputItemSimple(String trigger) {
+		RSInterface oo = Interfaces.get(162,42);
+		if(oo != null && !oo.isHidden()  && oo.getText() != null && oo.getText().contains("What would you")) {
+			General.sleep(19,39);
+		}else {
+			clickSearchBox();
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,39);
+					RSInterface oo = Interfaces.get(162,42);
+					return oo != null && !oo.isHidden() && oo.getText() != null &&  oo.getText().contains("What would you");
+				}
+			}, General.random(3900,4912));
+			sleepGeneralReactionTime();
+		}
+		if(oo != null && !oo.isHidden() && oo.getText().contains("What would you")) {
+			Keyboard.typeString(trigger.toLowerCase());
+			Timing.waitCondition(new Condition() {
+				@Override
+				public boolean active() {
+					General.sleep(21,39);
+					RSInterface la = Interfaces.get(162,50,0);
+					return la != null && !la.isHidden() && la.getText() != null && !la.getText().contains("Previous") && !prevItem();
+				}
+			}, General.random(3900,4912));
+			sleepGeneralReactionTime();
+			
+			RSInterface la = Interfaces.get(162,50,0);
+			RSInterface e = Interfaces.get(162,50,4);
+			if(la != null && !la.isHidden() && la.getText() != null && !la.getText().contains("Previous") && !prevItem()) {
+				RSInterface cli = Interfaces.get(162,50);
+				if(cli != null) {
+					for(int i = 0; i < cli.getChildren().length; i++) {
+						if(cli.getChild(i) != null) {
+							if(cli.getChild(i).getText().contains(trigger)) {
+								if(cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds())) {
+									cli.getChild(i).click();
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(21,39);
+											return GrandExchange.getItemName() != null && GrandExchange.getItemName().contains(trigger);
+										}
+									}, General.random(3600,4500));
+									sleepGeneralReactionTime();
+									break;
+								}else {
+									scrollGeCount = 0;
+									while(cli != null && !cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds()) && 
+											Interfaces.get(162,50) != null && cli.getChild(i) != null) {
+										scrollDownGE();
+										
+										sleepGeneralReactionTime();
+										if(scrollGeCount >= 17) {
+											scrollGeCount = 0;
+											break;
+										}
+										scrollGeCount++;
+									}
+									scrollGeCount = 0;
+									if(cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds())) {
+										cli.getChild(i).click();
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,39);
+												return GrandExchange.getItemName() != null && GrandExchange.getItemName().contains(trigger);
+											}
+										}, General.random(3600,4500));
+										sleepGeneralReactionTime();
+										break;
+									}
+								}
+								break;
+							}
+						
+						
+						}
+						General.sleep(19,39);
+					}
+					
+				}
+			}
+			
+			
+		}
+	}
+	
+	private static void scrollDownGE() {
+		Mouse.clickBox(496,457,507,468,1);
+	}
+	
+	private static void inputItem(String trigger, String one, String two, String three) {
+
+		RSInterface la = Interfaces.get(162,50,0);
+		RSInterface e = Interfaces.get(162,50,4);
+		if(la != null && !la.isHidden() && la.getText() != null && !la.getText().contains("Previous") && !prevItem()) {
+			General.println("ERR");
+			RSInterface cli = Interfaces.get(162,50);
+			if(cli != null) {
+				for(int i = 0; i < cli.getChildren().length; i++) {
+					if(cli.getChild(i) != null) {
+						if(trigger == "Bruise blue snelm") {
+							
+						}else {
+
+							if(cli.getChild(i).getText().contains(trigger) && !cli.getChild(i).getText().contains("Sapphire bolt tips")) {
+								if(cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds())) {
+									
+									cli.getChild(i).click();
+									sleepGeneralReactionTime();
+								}else {
+									while(cli != null && !cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds()) && 
+											Interfaces.get(162,50) != null && cli.getChild(i) != null) {
+										scrollDownGE();
+										sleepGeneralReactionTime();
+									}
+									if(cli.getAbsoluteBounds().contains(cli.getChild(i).getAbsoluteBounds())) {
+										
+										cli.getChild(i).click();
+										sleepGeneralReactionTime();
+									}
+								}
+								
+							
+								if(randomize()){
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(21,31);
+											return GrandExchange.getItemName().contains(trigger);
+										}
+									}, General.random(2600,2900));
+								}else{
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(21,31);
+											return GrandExchange.getItemName().contains(trigger);
+										}
+									}, General.random(3100,4112));
+								}
+								sleepGeneralReactionTime();
+								break;
+							}
+						
+						}
+					
+					
+					}
+					General.sleep(19,33);
+				}
+				
+			}
+		}else {
+			RSInterface oo = Interfaces.get(162,42);
+			if(oo != null && !oo.isHidden() && oo.getText().contains("What would you")) {
+				if(oo.getText().length() < 90 + trigger.length() + 2) {
+					if(randomize()) {
+						Keyboard.typeString(one);
+					}else {
+						if(randomize()) {
+							Keyboard.typeString(two);
+						}else {
+							Keyboard.typeString(three);
+						}
+					}
+					
+					if(randomize()){
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,31);
+								RSInterface o = Interfaces.get(162,50,1);
+								return o != null && !o.isHidden() && o.getText() != null && !o.getText().contains("Previous") && !prevItem();
+							}
+						}, General.random(2600,2900));
+					}else{
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,31);
+								RSInterface o = Interfaces.get(162,50,1);
+								return o != null && !o.isHidden() && o.getText() != null && !o.getText().contains("Previous") && !prevItem();
+							}
+						}, General.random(3100,4112));
+					}
+					sleepGeneralReactionTime();
+				
+				}else {
+					
+					clickSearchBox();
+					
+					if(randomize()){
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,31);
+								RSInterface wee = Interfaces.get(162,42);
+								return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+										wee.getText().length() < 48;
+							}
+						}, General.random(2600,2900));
+					}else{
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,31);
+								RSInterface wee = Interfaces.get(162,42);
+								return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+										wee.getText().length() < 48;
+							}
+						}, General.random(3100,4112));
+					}
+					sleepGeneralReactionTime();
+				}
+			}else {
+				clickSearchBox();
+				
+				if(randomize()){
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,31);
+							RSInterface wee = Interfaces.get(162,42);
+							return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+									wee.getText().length() < 48;
+						}
+					}, General.random(2600,2900));
+				}else{
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,31);
+							RSInterface wee = Interfaces.get(162,42);
+							return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+									wee.getText().length() < 48;
+						}
+					}, General.random(3100,4112));
+				}
+				sleepGeneralReactionTime();
+				sleepGeneralReactionTime();
+	
+				if(oo != null && !oo.isHidden() && oo.getText().contains("What would you")) {
+					if(oo.getText().length() < 90 + trigger.length() + 2) {
+						if(randomize()) {
+							Keyboard.typeString(one);
+						}else {
+							if(randomize()) {
+								Keyboard.typeString(two);
+							}else {
+								Keyboard.typeString(three);
+							}
+						}
+						
+						if(randomize()){
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSInterface o = Interfaces.get(162,50,1);
+									return o != null && !o.isHidden() && o.getText() != null && !o.getText().contains("Previous") && !prevItem();
+								}
+							}, General.random(2600,2900));
+						}else{
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSInterface o = Interfaces.get(162,50,1);
+									return o != null && !o.isHidden() && o.getText() != null && !o.getText().contains("Previous") && !prevItem();
+								}
+							}, General.random(3100,4112));
+						}
+						sleepGeneralReactionTime();
+					
+					}else {
+						clickSearchBox();
+						
+						if(randomize()){
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSInterface wee = Interfaces.get(162,42);
+									return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+											wee.getText().length() < 48;
+								}
+							}, General.random(2600,2900));
+						}else{
+							Timing.waitCondition(new Condition() {
+								@Override
+								public boolean active() {
+									General.sleep(21,31);
+									RSInterface wee = Interfaces.get(162,42);
+									return wee != null && !wee.isHidden() && wee.getText().contains("What would you") &&
+											wee.getText().length() < 48;
+								}
+							}, General.random(3100,4112));
+						}
+						sleepGeneralReactionTime();
+					}
+				}
+				
+				
+				
+				
+				
+			
+			}
+		}
+		
+		
+	
+	
+	}
+	
+	
+	
+	private static void returnToSelectionWindow() {
+		walkRandomBlindwalk(Player.getPosition(), 1);sleepGeneralReactionTime();
+
+		Timing.waitCondition(new Condition() {
+			@Override
+			public boolean active() {
+				General.sleep(21,39);
+				return GrandExchange.getWindowState() != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+			}
+		}, General.random(3900,4912));
+	
+		sleepGeneralReactionTime();
+	
+	}
+
+	
+	public static void abortOffers() {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0) {
+			for(int i = 0; i < hey.length; i++) {
+				if(hey[i] != null) {
+					if(hey[i].click("Abort")) {
+						sleepGeneralReactionTime();
+						sleepGeneralReactionTime();
+						sleepGeneralReactionTime();
+						sleepGeneralReactionTime();
+						sleepGeneralReactionTime();
+						sleepGeneralReactionTime();
+					}
+				}
+			}
+			
+		}
+	}
+	
+	public static void clickCollectItemBox() {
+		Mouse.clickBox(421,65,481,75,1);
+	}
+	
+	private static boolean pricingIsCorrect(String na) {
+		if(na.contains("schoo")) {
+			return GrandExchange.getPrice() > GrandExchange.getGuidePrice() && GrandExchange.getPrice() < GrandExchange.getGuidePrice() + 500000;
+		}else {
+			return GrandExchange.getPrice() > GrandExchange.getGuidePrice() && GrandExchange.getPrice() < GrandExchange.getGuidePrice() + 250000;
+			//return GrandExchange.getPrice() > GrandExchange.getGuidePrice() && (GrandExchange.getPrice() < GrandExchange.getPrice() + GrandExchange.getGuidePrice() * .06);
+		}
+	}
+	
+	private static boolean inPreviousOffer() {
+		RSInterface hey = Interfaces.get(465,2,1);
+		if(hey != null) {
+			if(hey.getText() != null && hey.getText().contains("status")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static void buyGeItemPercent(String name, int quantity, int additionalAmount, boolean individualItems) {
+
+		while(true) {
+			if(individualItems) {
+				if(Inventory.getCount(name) >= quantity) {
+					sleepGeneralReactionTime();
+					break;
+				}
+			}else {
+				if(Inventory.getCount(name) > 0) {
+					sleepGeneralReactionTime();
+					break;
+				}
+			}
+			
+			if(geOpen()) {
+				if(collectItemsAvailable()) {
+					if(GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+						
+						clickCollectItemBox();
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,39);
+								return !collectItemsAvailable();
+							}
+						}, General.random(3100,3900));
+						sleepGeneralReactionTime();
+					}else {
+						Walking.walkTo(Player.getPosition());
+						sleepGeneralReactionTime();
+					}
+				}else {
+					RSGEOffer yo = GrandExchange.getCurrentOffer();
+					if(inPreviousOffer()) {
+						Mouse.clickBox(39,282,61,293,1);
+						sleepGeneralReactionTime();
+						
+					}
+					if(yo != null) {
+						if(yo.getType() == RSGEOffer.TYPE.BUY) {
+							
+									inputItemSimple(name);
+									General.sleep(19,39);
+									if(!individualItems) {
+									setTheQuant(name, quantity);
+									General.sleep(19,39);
+									}
+									
+									tickUpPricePercent(name,additionalAmount);
+									General.sleep(19,39);
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											
+											General.sleep(21,39);
+											if(individualItems) {
+												return pricingIsCorrect(name);
+											}else {
+												return pricingIsCorrect(name) && GrandExchange.getQuantity() == quantity;
+											}
+											
+										}
+									}, General.random(2143,3121));
+									
+									if(individualItems) {
+										holdQuant = 1;
+									}else {
+										holdQuant = quantity;
+									}
+									
+									if(pricingIsCorrect(name) && GrandExchange.getQuantity() == holdQuant) {
+										
+										clickConfirmGEOffer();
+										sleepGeneralReactionTime();
+										if(General.random(1,12) != 1) {
+											Mouse.moveBox(423,52,516,95);
+										}
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,39);
+												return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+											}
+										}, General.random(3800,4900));
+										sleepGeneralReactionTime();
+										if(geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+											Timing.waitCondition(new Condition() {
+												@Override
+												public boolean active() {
+													General.sleep(21,39);
+													return collectItemsAvailable();
+												}
+											}, General.random(3800,4900));
+											sleepGeneralReactionTime();
+											//hover the box
+											if(collectItemsAvailable()) {
+												
+												clickCollectItemBox();
+												Timing.waitCondition(new Condition() {
+													@Override
+													public boolean active() {
+														General.sleep(21,39);
+														return !collectItemsAvailable();
+													}
+												}, General.random(3800,4900));
+												sleepGeneralReactionTime();
+											}
+										}
+									}
+						}else {
+							
+							General.println("return.");
+							returnToSelectionWindow();
+						}
+					}else {
+						General.println("handle.");
+						handleOfferScreen(name);
+					
+					}
+				}
+		}else {
+			if(Inventory.getCount(995) == 0) {
+				
+				clickExchangeBank();
+			}else {
+				if(Banking.isBankScreenOpen()) {
+					if(Banking.withdraw(0, "Coins")) {
+						sleepGeneralReactionTime();
+						
+					}
+					Banking.close();
+					sleepGeneralReactionTime();
+				}else {
+					openExchange();
+				}
+			}
+		}
+			General.sleep(19,44);
+		}
+			
+	
+	}
+	
+	public static void buyGeItemPercent(String name, int quantity, int additionalAmount) {
+		while(true) {
+			if(Inventory.getCount(name) > 0) {
+				sleepGeneralReactionTime();
+				break;
+			}
+			if(geOpen()) {
+				if(collectItemsAvailable()) {
+					if(GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+						
+						clickCollectItemBox();
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,39);
+								return !collectItemsAvailable();
+							}
+						}, General.random(3100,3900));
+						sleepGeneralReactionTime();
+					}else {
+						Walking.walkTo(Player.getPosition());
+						sleepGeneralReactionTime();
+					}
+				}else {
+					if(inPreviousOffer()) {
+						Mouse.clickBox(39,282,61,293,1);
+						sleepGeneralReactionTime();
+					
+					}
+					RSGEOffer yo = GrandExchange.getCurrentOffer();
+					if(yo != null) {
+						if(yo.getType() == RSGEOffer.TYPE.BUY) {
+							
+							
+									inputItemSimple(name);
+									General.sleep(19,39);
+
+									setTheQuant(name, quantity);
+									General.sleep(19,39);
+									
+									tickUpPricePercent(name,additionalAmount);
+									General.sleep(19,39);
+									
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(21,39);
+											return pricingIsCorrect(name) && GrandExchange.getQuantity() == quantity;
+										}
+									}, General.random(2143,3121));
+									
+									if(pricingIsCorrect(name) && GrandExchange.getQuantity() == quantity) {
+										
+										clickConfirmGEOffer();
+										sleepGeneralReactionTime();
+										if(General.random(1,12) != 1) {
+											Mouse.moveBox(423,52,516,95);
+										}
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,39);
+												return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+											}
+										}, General.random(3800,4900));
+										sleepGeneralReactionTime();
+										if(geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+											Timing.waitCondition(new Condition() {
+												@Override
+												public boolean active() {
+													General.sleep(21,39);
+													return collectItemsAvailable();
+												}
+											}, General.random(3800,4900));
+											sleepGeneralReactionTime();
+											//hover the box
+											if(collectItemsAvailable()) {
+												
+												clickCollectItemBox();
+												Timing.waitCondition(new Condition() {
+													@Override
+													public boolean active() {
+														General.sleep(21,39);
+														return !collectItemsAvailable();
+													}
+												}, General.random(3800,4900));
+												sleepGeneralReactionTime();
+											}
+										}
+									}
+						}else {
+							
+							General.println("return.");
+							returnToSelectionWindow();
+						}
+					}else {
+						General.println("handle.");
+						handleOfferScreen(name);
+					
+					}
+				}
+		}else {
+			if(Inventory.getCount(995) == 0) {
+				
+				clickExchangeBank();
+			}else {
+				if(Banking.isBankScreenOpen()) {
+					if(Banking.withdraw(0, "Coins")) {
+						sleepGeneralReactionTime();
+						
+					}
+					Banking.close();
+					sleepGeneralReactionTime();
+				}else {
+					openExchange();
+				}
+			}
+		}
+			General.sleep(19,44);
+		}
+		
+
+	}
+	
+	private static int holdQuant = 0;
+	
+	public static void buyGeItemTicker(String name, int quantity, boolean individualItems) {
+		while(true) {
+			if(individualItems) {
+				if(Inventory.getCount(name) >= quantity) {
+					sleepGeneralReactionTime();
+					break;
+				}
+			}else {
+				if(Inventory.getCount(name) > 0) {
+					sleepGeneralReactionTime();
+					break;
+				}
+			}
+			
+			if(geOpen()) {
+				if(collectItemsAvailable()) {
+					if(GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+						
+						clickCollectItemBox();
+						Timing.waitCondition(new Condition() {
+							@Override
+							public boolean active() {
+								General.sleep(21,39);
+								return !collectItemsAvailable();
+							}
+						}, General.random(3100,3900));
+						sleepGeneralReactionTime();
+					}else {
+						Walking.walkTo(Player.getPosition());
+						sleepGeneralReactionTime();
+					}
+				}else {
+					RSGEOffer yo = GrandExchange.getCurrentOffer();
+					if(inPreviousOffer()) {
+						Mouse.clickBox(39,282,61,293,1);
+						sleepGeneralReactionTime();
+						
+					}
+					if(yo != null) {
+						if(yo.getType() == RSGEOffer.TYPE.BUY) {
+							
+									inputItemSimple(name);
+									General.sleep(19,39);
+									if(!individualItems) {
+									setTheQuant(name, quantity);
+									General.sleep(19,39);
+									}
+									
+									tickUpPriceTicker(name);
+									General.sleep(19,39);
+									Timing.waitCondition(new Condition() {
+										@Override
+										public boolean active() {
+											General.sleep(21,39);
+											if(individualItems) {
+												return pricingIsCorrect(name);
+											}else {
+												return pricingIsCorrect(name) && GrandExchange.getQuantity() == quantity;
+											}
+											
+										}
+									}, General.random(2143,3121));
+									
+									if(individualItems) {
+										holdQuant = 1;
+									}else {
+										holdQuant = quantity;
+									}
+									
+									if(pricingIsCorrect(name) && GrandExchange.getQuantity() == holdQuant) {
+										
+										clickConfirmGEOffer();
+										sleepGeneralReactionTime();
+										if(General.random(1,12) != 1) {
+											Mouse.moveBox(423,52,516,95);
+										}
+										Timing.waitCondition(new Condition() {
+											@Override
+											public boolean active() {
+												General.sleep(21,39);
+												return geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW;
+											}
+										}, General.random(3800,4900));
+										sleepGeneralReactionTime();
+										if(geOpen() && GrandExchange.WINDOW_STATE.SELECTION_WINDOW != null && GrandExchange.getWindowState() == GrandExchange.WINDOW_STATE.SELECTION_WINDOW) {
+											Timing.waitCondition(new Condition() {
+												@Override
+												public boolean active() {
+													General.sleep(21,39);
+													return collectItemsAvailable();
+												}
+											}, General.random(3800,4900));
+											sleepGeneralReactionTime();
+											//hover the box
+											if(collectItemsAvailable()) {
+												
+												clickCollectItemBox();
+												Timing.waitCondition(new Condition() {
+													@Override
+													public boolean active() {
+														General.sleep(21,39);
+														return !collectItemsAvailable();
+													}
+												}, General.random(3800,4900));
+												sleepGeneralReactionTime();
+											}
+										}
+									}
+						}else {
+							
+							General.println("return.");
+							returnToSelectionWindow();
+						}
+					}else {
+						General.println("handle.");
+						handleOfferScreen(name);
+					
+					}
+				}
+		}else {
+			
+			if(Inventory.getCount(995) == 0) {
+				
+				clickExchangeBank();
+			}else {
+				if(Banking.isBankScreenOpen()) {
+					if(Banking.withdraw(0, "Coins")) {
+						sleepGeneralReactionTime();
+						
+					}
+					Banking.close();
+					sleepGeneralReactionTime();
+				}else {
+					openExchange();
+				}
+			}
+		}
+			General.sleep(19,44);
+		}
+			
+	}
+	
+	
+	public static boolean incompleteOfferDetected() {
+		RSGEOffer[] hey = GrandExchange.getOffers();
+		if(hey.length > 0) {
+			for(int i = 0; i < hey.length; i++) {
+				if(hey[i].getStatus().equals(RSGEOffer.STATUS.IN_PROGRESS)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static boolean incompleteOffer;
+	
+
+	private static void clickResetPrice() {
+		Mouse.clickBox(340,203,362,220,1);
+		
+	}
+
+	
+	static int randomInvItemNumber = 0;
+
+	private static void clickRandomInventoryItem(){
+		RSItem[] a = Inventory.getAll();
+		randomInvItemNumber = General.random(0, a.length - 1);
+		if(randomize()){
+			if(a.length > 0 && a[randomInvItemNumber] != null){
+				a[randomInvItemNumber].click();
+				sleepGeneralReactionTime();
+			}
+		}else{
+			if(a.length > 0 && a[0] != null){
+				a[0].click();
+				sleepGeneralReactionTime();
+			}
+		}
+	}
+	
+	private static boolean emptySlots() {
+		RSGEOffer[] completed = GrandExchange.getOffers();
+		if(completed.length > 0) {
+			for(int i = 0; i < completed.length; i++) {
+				if(completed[i].getStatus() == RSGEOffer.STATUS.EMPTY) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static boolean completedOffers() {
+		RSGEOffer[] completed = GrandExchange.getOffers();
+		if(completed.length > 0) {
+			for(int i = 0; i < completed.length; i++) {
+				if(completed[i].getStatus() == RSGEOffer.STATUS.COMPLETED) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	private static int failedClick = 0;
+	
+	public static void openExchange() {
+		if(Banking.isBankScreenOpen() || failedClick >= 4) {
+			Walking.blindWalkTo(Player.getPosition());
+			sleepGeneralReactionTime();
+			failedClick = 0;
+		}
+		
+		
+		if(Interfaces.get(345,1) != null) {
+			Walking.blindWalkTo(Player.getPosition());
+			sleepGeneralReactionTime();
+		}
+		if(Interfaces.get(192,0) != null) {
+			Walking.blindWalkTo(Player.getPosition());
+			sleepGeneralReactionTime();
+		}
+		if(Interfaces.get(214) != null || Interfaces.get(192) != null) {
+			walkRandomBlindwalk(Player.getPosition(), 0);
+			sleepGeneralReactionTime();
+		}
+
+		RSNPC[] chest = NPCs.findNearest("Grand Exchange Clerk");
+		
+				if(Game.getUptext().contains("->")){
+					clickRandomInventoryItem();
+				}
+				if(chest != null){
+					if(Banking.isBankScreenOpen()) {
+						Walking.blindWalkTo(Player.getPosition());
+						sleepGeneralReactionTime();
+					}
+					if(chest[0].isOnScreen() && chest[0].isClickable()){
+						if(chest[0].click("Exchange Grand Exchange Clerk")) {
+							if(General.random(1,2) != 1){
+								Timing.waitCondition(new Condition() {
+									@Override
+									public boolean active() {
+										General.sleep(21,39);
+										return geOpen();
+									}
+								}, General.random(25,39));
+								sleepGeneralReactionTime();
+							}else{
+								Timing.waitCondition(new Condition() {
+									@Override
+									public boolean active() {
+										if(Player.isMoving()) {
+											sleepGeneralReactionTime();
+										}else {
+											General.sleep(21,39);
+										}
+										return geOpen();
+									}
+								}, General.random(3312,4612));
+								sleepGeneralReactionTime();
+							}
+						}else {
+							failedClick++;
+						}
+						
+						
+					}else{
+						walkRandomBlindwalk(chest[0].getPosition(), 1);
+						sleepGeneralReactionTime();
+					}	
+				}else {
+					walkRandomBlindwalk(new RSTile(3165,3489), 2);
+					sleepGeneralReactionTime();
+				}
+			
+			
+		
+		
+	
+	}
+	
+	public static void initialBankForCash() {
+		while(true) {
+			if(atArea(grandexchange)) {
+				RSItem[] e = Inventory.find(995);
+				
+				if(Inventory.getAll().length == 1 && (e.length > 0 && e[0].getStack() >= 100000)) {
+					break;
+				}else {
+					if(!Banking.isBankScreenOpen()) {
+						clickExchangeBank();
+					}else {
+						if(Interfaces.get(664,28)  != null) {
+							Interfaces.get(664,28).click();
+							sleepGeneralReactionTime();
+						}
+
+						Banking.depositAllExcept(995);
+						sleepGeneralReactionTime();
+						Banking.withdraw(0, 995);
+						sleepGeneralReactionTime();
+						Banking.close();
+						sleepGeneralReactionTime();
+					}
+				}
+			}else {
+				if(atArea(varrock)) {
+					walkRandomBlindwalk(new RSTile(3162,3482), 1);
+					sleepGeneralReactionTime();
+				}else {
+					teleportToVarrock();
+				}
+				
+			}
+			General.sleep(19,33);
+		}
+		
+	}
+	
+	private static void teleportToVarrock(){
+		RSItem[] lumb = Inventory.find("Varrock teleport");
+		if(lumb.length > 0){
+			if(lumb[0].click("Break")) {
+				if(randomize()){
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,31);
+							return atArea(varrock);
+						}
+					}, General.random(6100,6900));
+				}else{
+					Timing.waitCondition(new Condition() {
+						@Override
+						public boolean active() {
+							General.sleep(21,31);
+							return atArea(varrock);
+						}
+					}, General.random(6900,8912));
+				}
+				sleepGeneralReactionTime();
+			}
+		}
+	}
+	
+	
+	private static final RSArea varrock = 
+			new RSArea(new RSTile(3100, 3400, 0), new RSTile(3260, 3540, 0));
+	
+	private static boolean atArea(RSArea a){
+		return a.contains(Player.getPosition());
+	}
+
+	
+	private static final RSArea grandexchange = 
+			new RSArea(new RSTile(3100, 3460, 0), new RSTile(3260, 3540, 0));
+
+	
+
+
+	@Override
+	public void run() {
+		
+	}
+	
+	
+}
